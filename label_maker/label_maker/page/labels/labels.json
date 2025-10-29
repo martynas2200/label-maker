@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2025-10-29 15:59:55.081848",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-10-29 15:59:55.081848",
+ "modified_by": "Administrator",
+ "module": "Label Maker",
+ "name": "labels",
+ "owner": "Administrator",
+ "page_name": "labels",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Labels"
+}

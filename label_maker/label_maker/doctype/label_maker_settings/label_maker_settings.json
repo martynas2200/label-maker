@@ -1,0 +1,57 @@
+{
+  "doctype": "DocType",
+  "name": "Label Maker Settings",
+  "module": "Label Maker",
+  "custom": 0,
+  "owner": "Administrator",
+  "is_submittable": 0,
+  "issingle": 1,
+  "track_changes": 1,
+  "allow_rename": 0,
+  "fields": [
+    {
+      "fieldname": "default_label_type",
+      "label": "Default Label Type",
+      "fieldtype": "Link",
+      "options": "Label Type"
+    },
+    {
+      "fieldname": "ws_address",
+      "label": "WebSocket Address",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "tts_api_key",
+      "label": "TTS API Key",
+      "fieldtype": "Password"
+    },
+    {
+      "fieldname": "package_item",
+      "label": "Package Item",
+      "fieldtype": "Link",
+      "options": "Item"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    },
+    {
+      "role": "Label Maker User",
+      "read": 1,
+      "write": 0,
+      "create": 0,
+      "delete": 0,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}

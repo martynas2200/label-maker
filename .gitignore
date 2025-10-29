@@ -5,6 +5,12 @@ __pycache__/
 *.pyc
 *.py~
 
+# Builds
+label_maker/www/labels_assets/
+label_maker/www/labels.html
+
+*.lock
+
 # Distribution / packaging
 .Python
 develop-eggs/
@@ -47,9 +53,3 @@ jspm_packages/
 *.comp.js
 .wnf-lang-status
 *debug.log
-
-# Helix Editor
-.helix/
-
-# Aider AI Chat
-.aider*

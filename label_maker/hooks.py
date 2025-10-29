@@ -5,28 +5,24 @@ app_description = "Create labels for your Items"
 app_email = "labels@ekranas.info"
 app_license = "mit"
 
-# Apps
-# ------------------
-
 # required_apps = []
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "label_maker",
-# 		"logo": "/assets/label_maker/logo.png",
-# 		"title": "Label Maker",
-# 		"route": "/label_maker",
-# 		"has_permission": "label_maker.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": "label_maker",
+		"logo": "/assets/label_maker/logo.svg",
+		"title": "Label Maker",
+		"route": "/labels",
+	}
+]
 
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/label_maker/css/label_maker.css"
-# app_include_js = "/assets/label_maker/js/label_maker.js"
+# Load assets only on the Label Maker page via page-specific boot script
+# app_include_js = "/assets/label_maker/js/label_maker_loader.js"  # not needed when using page_js
 
 # include js, css files in header of web template
 # web_include_css = "/assets/label_maker/css/label_maker.css"
@@ -38,9 +34,6 @@ app_license = "mit"
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
 # webform_include_css = {"doctype": "public/css/doctype.css"}
-
-# include js in page
-# page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -244,4 +237,3 @@ app_license = "mit"
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-

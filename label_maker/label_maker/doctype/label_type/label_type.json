@@ -1,0 +1,88 @@
+{
+  "doctype": "DocType",
+  "name": "Label Type",
+  "module": "Label Maker",
+  "custom": 0,
+  "is_submittable": 0,
+  "track_changes": 1,
+  "allow_rename": 1,
+  "autoname": "field:label_name",
+  "fields": [
+    {
+      "fieldname": "label_name",
+      "label": "Label Name",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "description",
+      "label": "Description",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "template",
+      "label": "Template",
+      "fieldtype": "Code",
+      "options": "HTML"
+    },
+    {
+      "fieldname": "width",
+      "label": "Width (mm)",
+      "fieldtype": "Float",
+      "default": 50
+    },
+    {
+      "fieldname": "height",
+      "label": "Height (mm)",
+      "fieldtype": "Float",
+      "default": 30
+    },
+    {
+      "fieldname": "margin_top",
+      "label": "Margin Top (mm)",
+      "fieldtype": "Float",
+      "default": 5
+    },
+    {
+      "fieldname": "margin_left",
+      "label": "Margin Left (mm)",
+      "fieldtype": "Float",
+      "default": 5
+    },
+    {
+      "fieldname": "columns",
+      "label": "Columns",
+      "fieldtype": "Int",
+      "default": 1
+    },
+    {
+      "fieldname": "weighted",
+      "label": "Weighted",
+      "fieldtype": "Check",
+      "default": 0
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    },
+    {
+      "role": "Label Maker User",
+      "read": 1,
+      "write": 0,
+      "create": 0,
+      "delete": 0,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}

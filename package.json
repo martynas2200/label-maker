@@ -1,0 +1,29 @@
+{
+  "name": "label_maker_ui",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "feather-icons": "~4.29.2",
+    "frappe-ui": "~0.1.205",
+    "vue": "~3.5.22",
+    "vue-router": "~4.6.3"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.71",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.13",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "sass-embedded": "^1.93.2",
+    "tailwindcss": "^3.4.1",
+    "unplugin-icons": "^22.5.0",
+    "unplugin-vue-components": "^30.0.0",
+    "vite": "~7.1.12"
+  }
+}
