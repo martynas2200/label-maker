@@ -137,7 +137,7 @@
 									{{ priceLists.current_selling_price.price_list }}
 								</p>
 							</div>
-							<div>
+							<div v-if="priceLists.current_buying_price !== null">
 								<p class="text-xs font-medium text-gray-600">
 									Current Buying Price
 								</p>
@@ -254,12 +254,12 @@
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Valid From
+												Valid
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Valid Until
+												Modified
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
@@ -282,10 +282,15 @@
 												{{ price.price_list_rate.toFixed(2) }}
 											</td>
 											<td class="px-3 py-2 text-gray-600">
-												{{ price.valid_from || "-" }}
+												{{
+													(price.valid_from || "-") +
+													(price.valid_upto
+														? " - " + price.valid_upto
+														: "")
+												}}
 											</td>
 											<td class="px-3 py-2 text-gray-600">
-												{{ price.valid_upto || "-" }}
+												{{ formatDate(price.modified) }}
 											</td>
 											<td class="px-3 py-2">
 												<span
@@ -337,6 +342,8 @@ import { Dialog, Button, toast } from "frappe-ui";
 import { computed, ref } from "vue";
 import { call } from "frappe-ui";
 
+import { watch } from "vue";
+
 export default {
 	name: "ItemDetailsModal",
 	components: { Dialog, Button },
@@ -354,9 +361,17 @@ export default {
 		const priceLists = ref(null);
 		const loadingPrices = ref(false);
 
+		watch(
+			() => props.item,
+			() => {
+				// Reset price lists when item changes
+				priceLists.value = null;
+			}
+		);
+
 		function close() {
 			open.value = false;
-			priceLists.value = null; // Reset price lists when closing
+			priceLists.value = null;
 		}
 
 		async function loadPriceLists() {

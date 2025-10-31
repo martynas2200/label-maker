@@ -30,9 +30,6 @@ def get_item(code_or_barcode: str) -> dict[str, Any] | None:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	if not code_or_barcode:
 		return None
 
@@ -64,9 +61,6 @@ def get_items_by_codes(item_codes: list[str]) -> list[dict[str, Any]]:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	if not item_codes:
 		return []
 
@@ -105,8 +99,8 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw("You must be logged in to access item data", frappe.PermissionError)
+	if "Label Maker User" not in frappe.get_roles():
+		frappe.throw("You must have a role of Label Maker User to access item data", frappe.PermissionError)
 
 	# Check session cache
 	cache_key = "recent_items_cache"
@@ -190,9 +184,6 @@ def get_item_by_barcode(barcode: str) -> dict[str, Any] | None:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	normalized_barcode = _normalize_barcode(barcode)
 	if not normalized_barcode:
 		return None
@@ -218,14 +209,13 @@ def get_stock_level(item_code: str) -> float | None:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	if not item_code:
 		return None
 
 	try:
-		bin_entry = frappe.get_value("Bin", filters={"item_code": item_code}, fieldname="actual_qty")
+		bin_entry = frappe.get_value(
+			"Bin", filters={"item_code": item_code}, fieldname="actual_qty", ignore_permissions=True
+		)
 		return bin_entry if bin_entry is not None else None
 	except Exception as e:
 		frappe.log_error(f"Failed to fetch stock level for item {item_code}: {e!s}")
@@ -247,9 +237,6 @@ def get_item_selling_price(item_code: str, price_list: str | None = None) -> flo
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	if not item_code:
 		return None
 
@@ -313,9 +300,6 @@ def get_item_buying_prices(item_code: str, limit: int = 5) -> list[dict[str, Any
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	if not item_code:
 		return []
 
@@ -363,9 +347,6 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access item data"), frappe.PermissionError)
-
 	if not item_code:
 		return {
 			"selling_prices": [],
@@ -378,7 +359,7 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 		today = frappe.utils.today()
 
 		# Fetch all selling prices
-		selling_prices = frappe.db.sql(
+		all_prices = frappe.db.sql(
 			"""
 			SELECT
 				name,
@@ -388,6 +369,8 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 				valid_from,
 				valid_upto,
 				modified,
+				selling,
+				buying,
 				CASE
 					WHEN (valid_from IS NULL OR valid_from <= %(today)s)
 					AND (valid_upto IS NULL OR valid_upto >= %(today)s)
@@ -396,52 +379,28 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 				END as is_valid
 			FROM `tabItem Price`
 			WHERE item_code = %(item_code)s
-				AND selling = 1
 			ORDER BY is_valid DESC, modified DESC
 		""",
 			{"item_code": item_code, "today": today},
 			as_dict=True,
 		)
 
-		# Fetch all buying prices
-		buying_prices = frappe.db.sql(
-			"""
-			SELECT
-				name,
-				price_list,
-				price_list_rate,
-				currency,
-				valid_from,
-				valid_upto,
-				modified,
-				CASE
-					WHEN (valid_from IS NULL OR valid_from <= %(today)s)
-					AND (valid_upto IS NULL OR valid_upto >= %(today)s)
-					THEN 1
-					ELSE 0
-				END as is_valid
-			FROM `tabItem Price`
-			WHERE item_code = %(item_code)s
-				AND buying = 1
-			ORDER BY is_valid DESC, modified DESC
-		""",
-			{"item_code": item_code, "today": today},
-			as_dict=True,
+		selling_prices = [p for p in all_prices if p.get("selling") == 1]
+		current_selling = next(
+			(p for p in all_prices if p.get("is_valid") == 1 and p.get("selling") == 1), None
 		)
 
-		# Find current valid prices
-		current_selling = next((p for p in selling_prices if p.get("is_valid") == 1), None)
-		current_buying = next((p for p in buying_prices if p.get("is_valid") == 1), None)
+		current_buying = None
+		buying_prices = []
 
-		# if the user does not have permission to view Item Price, hide buying prices
-		if not frappe.has_permission("Item Price", "view", item_code):
-			return {
-				"selling_prices": selling_prices,
-				"buying_prices": [],
-				"current_selling_price": current_selling,
-				"current_buying_price": None,
-			}
+		if frappe.has_permission("Item Price", "read"):
+			buying_prices = [p for p in all_prices if p.get("buying") == 1]
+			current_buying = next(
+				(p for p in all_prices if p.get("is_valid") == 1 and p.get("buying") == 1), None
+			)
+
 		return {
+			"item_code": item_code,
 			"selling_prices": selling_prices,
 			"buying_prices": buying_prices,
 			"current_selling_price": current_selling,
@@ -450,6 +409,7 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 	except Exception as e:
 		frappe.log_error(f"Failed to fetch price lists for item {item_code}: {e!s}")
 		return {
+			"item_code": item_code,
 			"selling_prices": [],
 			"buying_prices": [],
 			"current_selling_price": None,
@@ -536,6 +496,9 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 			"barcodes": [bc.barcode for bc in item.barcodes] if hasattr(item, "barcodes") else [],
 			"stock_qty": stock_qty,
 			"description": item.description if hasattr(item, "description") else None,
+			"deposit_package_count": item.deposit_package_count
+			if hasattr(item, "deposit_package_count")
+			else 0,
 			"disabled": item.disabled if hasattr(item, "disabled") else False,
 			"modified": item.modified,
 		}

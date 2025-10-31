@@ -17,6 +17,21 @@ add_to_apps_screen = [
 	}
 ]
 
+fixtures = [
+	{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_package_count"]]]},
+	{
+		"dt": "Custom DocPerm",
+		"filters": [
+			["role", "in", ["Label Maker User"]],
+			[
+				"parent",
+				"in",
+				["Item"],
+			],  # NOTE: consider adding Item Price later, but that will expose buying prices too
+		],
+	},
+]
+
 # Includes in <head>
 # ------------------
 
@@ -192,7 +207,7 @@ add_to_apps_screen = [
 
 # Request Events
 # ----------------
-# before_request = ["label_maker.utils.before_request"]
+before_request = ["label_maker.utils.guard.ensure_label_maker_access"]
 # after_request = ["label_maker.utils.after_request"]
 
 # Job Events

@@ -29,43 +29,61 @@
 						size="sm"
 						@click="$emit('reconnect')"
 						variant="solid"
-						theme="orange"
 					>
 						<i class="fa fa-plug mr-1"></i>Reconnect
 					</Button>
 					<Dropdown
 						:options="[
 							{
-								label: 'Show Stock Qty',
-								switch: true,
-								switchValue: showStockQty,
-								onClick: (val) => $emit('update:showStockQty', val),
+								group: 'Options',
+								items: [
+									{
+										label: 'Show Stock Qty',
+										switch: true,
+										switchValue: showStockQty,
+										onClick: (val) => $emit('update:showStockQty', val),
+									},
+									{
+										label: 'Show Input',
+										switch: true,
+										switchValue: showInputManually,
+										onClick: (val) => $emit('update:showInputManually', val),
+									},
+									{
+										label: 'Speak Price',
+										switch: true,
+										switchValue: speakPrice,
+										onClick: (val) => $emit('update:speakPrice', val),
+									},
+									{
+										label: 'Cards View',
+										switch: true,
+										switchValue: cardsView,
+										onClick: (val) => $emit('update:cardsView', val),
+									},
+								],
 							},
 							{
-								label: 'Show Input',
-								switch: true,
-								switchValue: showInputManually,
-								onClick: (val) => $emit('update:showInputManually', val),
-							},
-							{
-								label: 'Speak Price',
-								switch: true,
-								switchValue: speakPrice,
-								onClick: (val) => $emit('update:speakPrice', val),
-							},
-							{
-								label: 'Cards View',
-								switch: true,
-								switchValue: cardsView,
-								onClick: (val) => $emit('update:cardsView', val),
-							},
-							{
-								label: 'Go back to Apps',
-								icon: 'list',
-								onClick: this.goToApps,
+								group: 'Navigation',
+								items: [
+									{
+										icon: 'arrow-left-circle',
+										label: 'Go back to Apps',
+										onClick: this.goToApps,
+									},
+									{
+										label: 'Log out',
+										icon: 'log-out',
+										onClick: this.logOut,
+									},
+								],
 							},
 						]"
-					/>
+					>
+						<Button size="sm" variant="outline" theme="gray">
+							<FeatherIcon name="more-horizontal" class="w-4 h-4" />
+						</Button>
+					</Dropdown>
 					<Button
 						v-if="currentListLength > 0 && cardsView"
 						size="sm"
@@ -92,11 +110,11 @@
 </template>
 
 <script>
-import { Button, Dropdown } from "frappe-ui";
+import { Button, Dropdown, FeatherIcon } from "frappe-ui";
 
 export default {
 	name: "AppHeader",
-	components: { Button, Dropdown },
+	components: { Button, Dropdown, FeatherIcon },
 	props: {
 		wsConnected: Boolean,
 		showReconnectButton: Boolean,
@@ -119,6 +137,9 @@ export default {
 	methods: {
 		goToApps() {
 			window.location.href = "/apps";
+		},
+		logOut() {
+			window.location.href = "/logout";
 		},
 	},
 };

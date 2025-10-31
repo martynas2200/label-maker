@@ -330,9 +330,7 @@ export default {
 					timeout: 2,
 				});
 			} catch (e) {
-				console.error("Scan error:", e);
 				toast({
-					title: "Scan failed",
 					text: String(e?.message || e),
 					icon: "x",
 					variant: "warning",

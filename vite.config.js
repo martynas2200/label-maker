@@ -62,8 +62,12 @@ const setupWwwPlugin = () => {
 export default defineConfig(({ command }) => ({
 	plugins: [
 		vue(),
-		// Resolve ~icons/* imports used by frappe-ui components
-		Icons({ compiler: "vue3", autoInstall: true }),
+		Icons({
+			compiler: "vue3",
+			autoInstall: true,
+			defaultClass: "lucide",
+			defaultCollection: "lucide",
+		}),
 		setupWwwPlugin(),
 	],
 	resolve: {},
@@ -75,7 +79,6 @@ export default defineConfig(({ command }) => ({
 	optimizeDeps: {
 		// Ensure proper ESM interop for dependencies used by frappe-ui
 		include: [
-			"frappe-ui > feather-icons",
 			"showdown",
 			"engine.io-client",
 			// Pre-bundle highlight.js entrypoints used by lowlight to force ESM resolution

@@ -3,9 +3,9 @@
  */
 declare global {
   interface Window {
-    frappe: {
-      csrf_token: string
-      [key: string]: any
+    csrf_token?: string
+    frappe?: {
+      csrf_token?: string
     }
   }
 }
@@ -64,7 +64,7 @@ async function request(opts: RequestOptions, isMethod: boolean = false): Promise
     method,
     headers: {
       'Content-Type': 'application/json',
-      'X-Frappe-CSRF-Token': window.frappe?.csrf_token || '',
+      'X-Frappe-CSRF-Token': window?.csrf_token || (window.frappe?.csrf_token || ''),
     },
   }
 
