@@ -3,11 +3,13 @@
 		<div class="flex items-center justify-between mb-4">
 			<div class="flex items-center gap-2">
 				<i class="fa fa-history text-gray-500"></i>
-				<h2 class="text-lg font-semibold text-gray-900">Recently Modified Items</h2>
+				<h2 class="text-lg font-semibold text-gray-900">
+					{{ $t("Recently Modified Items") }}
+				</h2>
 				<span class="text-sm text-gray-500">({{ items.length }})</span>
 			</div>
 			<Button size="sm" :loading="loading" @click="$emit('refresh')" variant="subtle">
-				<i class="fa fa-sync mr-2"></i>Refresh
+				<i class="fa fa-refresh mr-2"></i>{{ $t("Refresh") }}
 			</Button>
 		</div>
 
@@ -15,23 +17,31 @@
 			<div class="text-gray-400 text-4xl mb-2">
 				<i class="fa fa-inbox"></i>
 			</div>
-			<p class="text-gray-500">No recently modified items</p>
+			<p class="text-gray-500">{{ $t("No recently modified items") }}</p>
 		</div>
 
 		<div v-else class="overflow-x-auto">
 			<table class="w-full text-sm">
 				<thead class="border-b border-gray-200 bg-gray-50">
 					<tr>
-						<th class="px-4 py-3 text-left font-semibold text-gray-700">Item Code</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-700">Item Name</th>
-						<th class="px-4 py-3 text-right font-semibold text-gray-700">Rate</th>
+						<th class="px-4 py-3 text-left font-semibold text-gray-700">
+							{{ $t("Item Code") }}
+						</th>
+						<th class="px-4 py-3 text-left font-semibold text-gray-700">
+							{{ $t("Item Name") }}
+						</th>
+						<th class="px-4 py-3 text-right font-semibold text-gray-700">
+							{{ $t("Rate") }}
+						</th>
 						<th
 							v-if="showStockQty"
 							class="px-4 py-3 text-right font-semibold text-gray-700"
 						>
-							Stock Qty
+							{{ $t("Stock Qty") }}
 						</th>
-						<th class="px-4 py-3 text-center font-semibold text-gray-700">Actions</th>
+						<th class="px-4 py-3 text-center font-semibold text-gray-700">
+							{{ $t("Actions") }}
+						</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200">

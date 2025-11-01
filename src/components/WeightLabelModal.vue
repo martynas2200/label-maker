@@ -1,14 +1,16 @@
 <template>
-	<Dialog v-model="open" :options="{ size: 'xl', title: 'Weight Label' }">
+	<Dialog v-model="open" :options="{ size: 'xl', title: $t('Weight Label') }">
 		<template #body-content>
 			<div class="space-y-4">
 				<div class="grid grid-cols-12 gap-4">
 					<div class="col-span-12">
-						<label class="block text-sm text-gray-600 mb-1">Name</label>
+						<label class="block text-sm text-gray-600 mb-1">{{ $t("Name") }}</label>
 						<Input :value="item.item_name" readonly />
 					</div>
 					<div class="col-span-6 sm:col-span-4">
-						<label class="block text-sm text-gray-600 mb-1">Quantity (g/vnt.)</label>
+						<label class="block text-sm text-gray-600 mb-1">{{
+							$t("Quantity (g/vnt.)")
+						}}</label>
 						<Input
 							v-model="weight"
 							type="text"
@@ -19,12 +21,14 @@
 					</div>
 					<div class="col-span-6 sm:col-span-4">
 						<label class="block text-sm text-gray-600 mb-1"
-							>Price per {{ item.stock_uom }}</label
+							>{{ $t("Price per ") }} {{ item.stock_uom }}</label
 						>
 						<Input v-model="pricePerKg" type="number" step="0.01" disabled="true" />
 					</div>
 					<div class="col-span-6 sm:col-span-4">
-						<label class="block text-sm text-gray-600 mb-1">Total Price</label>
+						<label class="block text-sm text-gray-600 mb-1">{{
+							$t("Total Price")
+						}}</label>
 						<Input :value="totalPrice.toFixed(2)" readonly />
 					</div>
 				</div>
@@ -32,16 +36,26 @@
 				<div class="grid grid-cols-12 gap-4">
 					<div class="col-span-12 sm:col-span-6 flex flex-col gap-3">
 						<div>
-							<label class="block text-sm text-gray-600 mb-1">Expiry Date</label>
+							<label class="block text-sm text-gray-600 mb-1">{{
+								$t("Expiry Date")
+							}}</label>
 							<Input v-model="expiryDate" type="date" />
 						</div>
 						<Checkbox
 							class="mt-2"
 							v-model="addManufacturer"
-							:label="'Add manufacturer ' + (item.default_item_manufacturer || '')"
+							:label="
+								$t('Add manufacturer') +
+								' ' +
+								(item.default_item_manufacturer || '')
+							"
 							v-if="item.default_item_manufacturer"
 						/>
-						<Checkbox class="mt-2" v-model="addPackageFee" label="Add package fee" />
+						<Checkbox
+							class="mt-2"
+							v-model="addPackageFee"
+							:label="$t('Add package fee')"
+						/>
 						<!-- TODO: show an error/disable if the settings are not set -->
 					</div>
 					<div class="col-span-12 sm:col-span-6" v-if="showKeypad">
@@ -67,7 +81,7 @@
 		</template>
 		<template #actions="{ close }">
 			<div class="flex justify-end gap-2">
-				<Button @click="close" variant="outline">Close</Button>
+				<Button @click="close" variant="outline">{{ $t("Close") }}</Button>
 				<Button
 					@click="print"
 					:loading="printing"
@@ -75,7 +89,7 @@
 					variant="solid"
 					theme="blue"
 				>
-					<i class="fa fa-print mr-1" /> Print
+					<i class="fa fa-print mr-1" /> {{ $t("Print") }}
 				</Button>
 			</div>
 		</template>
@@ -194,7 +208,7 @@ export default {
 					add_manufacturer: addManufacturer.value || false,
 					add_package_fee: addPackageFee.value || false,
 				};
-				new LabelGenerator([item_to_print]);
+				new LabelGenerator([item_to_print], "normal", cfg);
 
 				toast({ title: "Label sent to printer", icon: "check" });
 				emit("printed", { item_code: props.item.item_code });
@@ -240,10 +254,6 @@ export default {
 			{ deep: true }
 		);
 
-		const dialogTitle = computed(() => {
-			return "Weight Label";
-		});
-
 		// Create a computed property for item to ensure reactivity
 		const item = computed(() => props.item);
 
@@ -269,7 +279,6 @@ export default {
 			key,
 			close,
 			print,
-			dialogTitle,
 			item,
 		};
 	},

@@ -120,6 +120,7 @@ import RecentlyModifiedTab from "./components/RecentlyModifiedTab.vue";
 import RecentlyScannedTab from "./components/RecentlyScannedTab.vue";
 import WeightLabelModal from "./components/WeightLabelModal.vue";
 import ItemDetailsModal from "./components/ItemDetailsModal.vue";
+import { useI18n } from "vue-i18n";
 
 export default {
 	name: "LabelMaker",
@@ -136,6 +137,7 @@ export default {
 		ItemDetailsModal,
 	},
 	setup() {
+		const { t } = useI18n();
 		const itemService = getItemService();
 		const scanner = getScannerService();
 		const labels = getLabelService();
@@ -143,8 +145,8 @@ export default {
 		const tts = getTTSService();
 
 		const tabs = [
-			{ label: "Recently Modified", key: "modified" },
-			{ label: "Recently Scanned", key: "scanned" },
+			{ label: t("Recently Modified"), key: "modified" },
+			{ label: t("Recently Scanned"), key: "scanned" },
 		];
 
 		// State
@@ -152,7 +154,11 @@ export default {
 		const showStockQty = ref(false);
 		const speakPrice = ref(true);
 		const currentList = ref([]); // Items ready to print
-		const recentlyScanned = ref([]); // History of scanned items
+		const recentlyScanned = ref(
+			localStorage.getItem("recentlyScanned")
+				? JSON.parse(localStorage.getItem("recentlyScanned"))
+				: []
+		); // Load from localStorage
 		const recentlyModified = ref([]); // Recently modified items from backend
 		const loadingModified = ref(false);
 		const barcode = ref("");
@@ -305,6 +311,7 @@ export default {
 					item,
 					...recentlyScanned.value.filter((i) => i.item_code !== item.item_code),
 				].slice(0, 50);
+				localStorage.setItem("recentlyScanned", JSON.stringify(recentlyScanned.value));
 
 				// Trigger dim effect for other items
 				triggerDimEffect();
@@ -419,7 +426,7 @@ export default {
 				// await labels.printLabels(codes, defaultLabelType)
 
 				// Option 2: Use frontend LabelGenerator directly (old class, but faster, no backend call)
-				new LabelGenerator(currentList.value, defaultLabelType);
+				new LabelGenerator(currentList.value, defaultLabelType, settings);
 
 				toast({
 					title: `Printing ${currentList.value.length} labels`,

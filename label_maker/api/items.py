@@ -485,6 +485,17 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 			frappe.log_error(f"Error fetching item price for {item_code}: {e!s}")
 			standard_rate = "ERROR"
 
+		# Fetch all comments
+		try:
+			comments = frappe.get_all(
+				"Comment",
+				filters={"reference_doctype": "Item", "reference_name": item_code},
+				fields=["*"],
+			)
+		except Exception as e:
+			frappe.log_error(f"Error fetching comments for item {item_code}: {e!s}")
+			comments = []
+
 		# Build response
 		return {
 			"item_code": item.name,
@@ -493,6 +504,9 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 			"suppliers": [s.supplier for s in item.supplier_items] if hasattr(item, "supplier_items") else [],
 			"stock_uom": item.stock_uom,
 			"standard_rate": standard_rate,
+			"safety_stock": item.safety_stock if hasattr(item, "safety_stock") else 0,
+			"comments": comments,
+			"reorder_levels": item.get("reorder_levels") if hasattr(item, "reorder_levels") else [],
 			"barcodes": [bc.barcode for bc in item.barcodes] if hasattr(item, "barcodes") else [],
 			"stock_qty": stock_qty,
 			"description": item.description if hasattr(item, "description") else None,

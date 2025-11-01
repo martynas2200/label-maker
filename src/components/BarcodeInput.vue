@@ -3,13 +3,15 @@
 		<div class="bg-white rounded-lg shadow border border-gray-200 p-4">
 			<div class="flex items-center gap-3">
 				<div class="flex-1">
-					<label class="block text-sm font-medium text-gray-700 mb-2"> Barcode </label>
+					<label class="block text-sm font-medium text-gray-700 mb-2">{{
+						$t("Barcode")
+					}}</label>
 					<div class="flex gap-2">
 						<input
 							ref="inputRef"
 							:value="modelValue"
 							@input="$emit('update:modelValue', $event.target.value)"
-							placeholder="Scan or enter barcode..."
+							:placeholder="$t('Scan or enter barcode manually')"
 							@keydown.enter="$emit('scan')"
 							type="text"
 							autocomplete="off"
@@ -21,7 +23,7 @@
 							variant="solid"
 							theme="green"
 						>
-							<i class="fa fa-plus mr-2"></i>Add Item
+							<i class="fa fa-plus mr-2"></i>{{ $t("Add Item") }}
 						</Button>
 					</div>
 				</div>

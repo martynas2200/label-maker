@@ -2,22 +2,22 @@ import "./app.scss";
 
 import { createApp } from "vue";
 import App from "./App.vue";
+import i18n from "./locales/i18n";
 
 import { Button, setConfig, frappeRequest, resourcesPlugin } from "frappe-ui";
 
 const mount = () => {
 	const el = document.querySelector("#app");
-	console.log("[Label Maker] mount() called, element found:", !!el);
+	console.log("[Label Maker] mount() called");
 	if (!el) {
 		console.warn("[Label Maker] #app element not found, cannot mount");
 		return;
 	}
 	const app = createApp(App);
-	console.log("[Label Maker] Creating Vue app");
 	setConfig("resourceFetcher", frappeRequest);
 	app.use(resourcesPlugin);
 	app.component("Button", Button);
-	console.log("[Label Maker] Mounting to #app");
+	app.use(i18n);
 	app.mount(el);
 };
 

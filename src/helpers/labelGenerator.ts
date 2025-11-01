@@ -34,6 +34,7 @@ export class LabelGenerator {
       | Promise<PackagedItem[]>
       | undefined = undefined,
     type: LabelType = 'normal',
+    settings?: any,
   ) {
     this.type = type
     if (data == null) {

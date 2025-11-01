@@ -4,7 +4,7 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
 					<div>
-						<h1 class="text-2xl font-bold text-gray-900">Label Maker</h1>
+						<h1 class="text-2xl font-bold text-gray-900">{{ $t("Label Maker") }}</h1>
 						<div
 							v-if="wsConnected"
 							class="flex items-center gap-2 text-sm text-green-600"
@@ -12,14 +12,14 @@
 							<span
 								class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"
 							></span>
-							Scanner connected
+							{{ $t("Scanner connected") }}
 						</div>
 						<div
 							v-else-if="showReconnectButton"
 							class="flex items-center gap-2 text-sm text-red-600"
 						>
 							<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-							Scanner disconnected
+							{{ $t("Scanner disconnected") }}
 						</div>
 					</div>
 				</div>
@@ -30,33 +30,33 @@
 						@click="$emit('reconnect')"
 						variant="solid"
 					>
-						<i class="fa fa-plug mr-1"></i>Reconnect
+						<i class="fa fa-plug mr-1"></i>{{ $t("Reconnect") }}
 					</Button>
 					<Dropdown
 						:options="[
 							{
-								group: 'Options',
+								group: $t('Options'),
 								items: [
 									{
-										label: 'Show Stock Qty',
+										label: $t('Show Stock Qty'),
 										switch: true,
 										switchValue: showStockQty,
 										onClick: (val) => $emit('update:showStockQty', val),
 									},
 									{
-										label: 'Show Input',
+										label: $t('Show Input'),
 										switch: true,
 										switchValue: showInputManually,
 										onClick: (val) => $emit('update:showInputManually', val),
 									},
 									{
-										label: 'Speak Price',
+										label: $t('Speak Price'),
 										switch: true,
 										switchValue: speakPrice,
 										onClick: (val) => $emit('update:speakPrice', val),
 									},
 									{
-										label: 'Cards View',
+										label: $t('Cards View'),
 										switch: true,
 										switchValue: cardsView,
 										onClick: (val) => $emit('update:cardsView', val),
@@ -64,15 +64,15 @@
 								],
 							},
 							{
-								group: 'Navigation',
+								group: $t('Navigation'),
 								items: [
 									{
 										icon: 'arrow-left-circle',
-										label: 'Go back to Apps',
+										label: $t('Go back to Apps'),
 										onClick: this.goToApps,
 									},
 									{
-										label: 'Log out',
+										label: $t('Log out'),
 										icon: 'log-out',
 										onClick: this.logOut,
 									},
@@ -91,7 +91,7 @@
 						variant="subtle"
 						theme="red"
 					>
-						<i class="fa fa-trash mr-2"></i>Clear
+						<i class="fa fa-trash mr-2"></i>{{ $t("Clear") }}
 					</Button>
 					<Button
 						:loading="printing"
@@ -101,7 +101,7 @@
 						theme="blue"
 					>
 						<i class="fa fa-print mr-2"></i>
-						Print ({{ currentListLength }})
+						{{ $t("Print") }} ({{ currentListLength }})
 					</Button>
 				</div>
 			</div>

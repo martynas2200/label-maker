@@ -1,7 +1,7 @@
 <template>
 	<Dialog v-model="open" :options="{ size: 'lg' }">
 		<template #body-title>
-			<h3 class="text-lg font-semibold text-gray-900">Item Details</h3>
+			<h3 class="text-lg font-semibold text-gray-900">{{ $t("Item Details") }}</h3>
 		</template>
 		<template #body-content>
 			<div class="space-y-6">
@@ -16,22 +16,30 @@
 						{{ item?.item_name }}
 					</h4>
 					<p class="text-sm text-gray-500">
-						Code:
+						{{ $t("Code") }}:
 						<code class="bg-green-100 px-2 py-1 rounded">{{ item?.item_code }}</code>
+						<!-- if package_deposit -->
+						<code
+							v-if="item?.deposit_package_count"
+							class="bg-yellow-100 px-2 py-1 rounded ml-2"
+						>
+							<i class="fa fa-plus mr-1"></i>
+							{{ item.deposit_package_count }} {{ $t("Deposit Packages") }}
+						</code>
 					</p>
 				</div>
 
 				<!-- Basic Information Grid -->
 				<div class="grid grid-cols-2 gap-6">
 					<div>
-						<label class="block text-sm font-medium text-gray-600 mb-2"
-							>Item Barcodes</label
-						>
+						<label class="block text-sm font-medium text-gray-600 mb-2">{{
+							$t("Item Barcodes")
+						}}</label>
 						<div
 							v-if="!item?.barcodes || item.barcodes.length === 0"
 							class="text-gray-400 italic"
 						>
-							No barcodes
+							{{ $t("No barcodes") }}
 						</div>
 						<div v-else class="flex flex-wrap gap-2">
 							<span
@@ -45,14 +53,14 @@
 						</div>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-600 mb-2"
-							>Suppliers</label
-						>
+						<label class="block text-sm font-medium text-gray-600 mb-2">{{
+							$t("Suppliers")
+						}}</label>
 						<div
 							v-if="!item?.suppliers || item.suppliers.length === 0"
 							class="text-gray-400 italic"
 						>
-							No suppliers
+							{{ $t("No suppliers") }}
 						</div>
 						<div v-else class="flex flex-wrap gap-2">
 							<span
@@ -66,43 +74,84 @@
 						</div>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-600 mb-1"
-							>Item Group</label
-						>
-						<p class="text-gray-900">{{ item?.item_group }}</p>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-600 mb-1"
-							>Standard Rate</label
-						>
-						<p class="text-gray-900">€{{ (item?.standard_rate || 0).toFixed(2) }}</p>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-600 mb-1"
-							>Stock Quantity</label
-						>
+						<label class="block text-sm font-medium text-gray-600 mb-1">{{
+							$t("Stock Quantity")
+						}}</label>
 						<p class="text-gray-900">
 							{{ item?.stock_qty || 0 }} {{ item?.stock_uom }}
 						</p>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-600 mb-1"
-							>Last Modified</label
-						>
+						<label class="block text-sm font-medium text-gray-600 mb-1">{{
+							$t("Safety Stock")
+						}}</label>
+						<div class="flex items-center gap-2">
+							<div v-if="!editingSafetyStock" class="flex items-center gap-2 flex-1">
+								<p class="text-gray-900">{{ item?.safety_stock || " - " }}</p>
+								<Button
+									@click="editingSafetyStock = true"
+									variant="subtle"
+									size="sm"
+									theme="gray"
+								>
+									<i class="fa fa-edit"></i>
+								</Button>
+							</div>
+							<div v-else class="flex items-center gap-2 flex-1">
+								<input
+									v-model.number="safetyStockValue"
+									type="number"
+									class="px-2 py-1 border border-gray-300 rounded text-sm flex-1"
+									:placeholder="item?.safety_stock || '0'"
+								/>
+								<Button
+									@click="saveSafetyStock"
+									variant="solid"
+									size="sm"
+									theme="green"
+									:loading="savingSafetyStock"
+								>
+									<i class="fa fa-check"></i>
+								</Button>
+								<Button
+									@click="editingSafetyStock = false"
+									variant="outline"
+									size="sm"
+									theme="gray"
+								>
+									<i class="fa fa-times"></i>
+								</Button>
+							</div>
+						</div>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-600 mb-1">{{
+							$t("Item Group")
+						}}</label>
+						<p class="text-gray-900">{{ item?.item_group }}</p>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-600 mb-1">{{
+							$t("Last Modified")
+						}}</label>
 						<p class="text-gray-900 text-sm">{{ formatDate(item?.modified) }}</p>
 					</div>
 				</div>
 
 				<!-- Additional Details -->
 				<div v-if="item?.description" class="border-t border-gray-200 pt-4">
-					<label class="block text-sm font-medium text-gray-600 mb-2">Description</label>
+					<label class="block text-sm font-medium text-gray-600 mb-2">{{
+						$t("Description")
+					}}</label>
 					<p class="text-gray-700 whitespace-pre-wrap">{{ item.description }}</p>
 				</div>
 
 				<!-- Price Lists Section -->
 				<div class="border-t border-gray-200 pt-4">
 					<div class="flex items-center justify-between mb-3">
-						<label class="block text-sm font-medium text-gray-600">Price Lists</label>
+						<label class="block text-sm font-medium text-gray-600">{{
+							$t("Price Lists")
+						}}</label>
 						<Button
 							@click="loadPriceLists"
 							variant="subtle"
@@ -110,7 +159,7 @@
 							size="sm"
 						>
 							<i class="fa fa-refresh mr-1"></i>
-							{{ priceLists ? "Refresh" : "Load" }} Prices
+							{{ priceLists ? $t("Refresh") : $t("Load") }} {{ $t("Prices") }}
 						</Button>
 					</div>
 
@@ -119,7 +168,7 @@
 						<div class="grid grid-cols-2 gap-4 p-3 bg-blue-50 rounded-lg">
 							<div>
 								<p class="text-xs font-medium text-gray-600">
-									Current Selling Price
+									{{ $t("Current Selling Price") }}
 								</p>
 								<p class="text-lg font-semibold text-gray-900">
 									{{
@@ -139,7 +188,7 @@
 							</div>
 							<div v-if="priceLists.current_buying_price !== null">
 								<p class="text-xs font-medium text-gray-600">
-									Current Buying Price
+									{{ $t("Current Buying Price") }}
 								</p>
 								<p class="text-lg font-semibold text-gray-900">
 									{{
@@ -162,7 +211,7 @@
 						<!-- Selling Prices Table -->
 						<div v-if="priceLists.selling_prices.length > 0">
 							<h5 class="text-sm font-semibold text-gray-700 mb-2">
-								Selling Prices
+								{{ $t("Selling Prices") }}
 							</h5>
 							<div class="overflow-x-auto">
 								<table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -171,27 +220,27 @@
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Price List
+												{{ $t("Price List") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Rate
+												{{ $t("Rate") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Valid From
+												{{ $t("Valid From") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Valid Until
+												{{ $t("Valid Until") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Status
+												{{ $t("Status") }}
 											</th>
 										</tr>
 									</thead>
@@ -219,13 +268,13 @@
 													v-if="price.is_valid"
 													class="px-2 py-1 text-xs rounded bg-green-100 text-green-800"
 												>
-													Active
+													{{ $t("Active") }}
 												</span>
 												<span
 													v-else
 													class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-600"
 												>
-													Inactive
+													{{ $t("Inactive") }}
 												</span>
 											</td>
 										</tr>
@@ -236,7 +285,9 @@
 
 						<!-- Buying Prices Table -->
 						<div v-if="priceLists.buying_prices.length > 0">
-							<h5 class="text-sm font-semibold text-gray-700 mb-2">Buying Prices</h5>
+							<h5 class="text-sm font-semibold text-gray-700 mb-2">
+								{{ $t("Buying Prices") }}
+							</h5>
 							<div class="overflow-x-auto">
 								<table class="min-w-full divide-y divide-gray-200 text-sm">
 									<thead class="bg-gray-50">
@@ -244,27 +295,27 @@
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Price List
+												{{ $t("Price List") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Rate
+												{{ $t("Rate") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Valid
+												{{ $t("Valid") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Modified
+												{{ $t("Modified") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												Status
+												{{ $t("Status") }}
 											</th>
 										</tr>
 									</thead>
@@ -297,13 +348,13 @@
 													v-if="price.is_valid"
 													class="px-2 py-1 text-xs rounded bg-green-100 text-green-800"
 												>
-													Active
+													{{ $t("Active") }}
 												</span>
 												<span
 													v-else
 													class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-600"
 												>
-													Inactive
+													{{ $t("Inactive") }}
 												</span>
 											</td>
 										</tr>
@@ -319,8 +370,66 @@
 							"
 						>
 							<p class="text-sm text-gray-500 text-center py-4">
-								No price lists found for this item.
+								{{ $t("No price lists found for this item.") }}
 							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Item Reorder Section -->
+				<ItemReorderSection :item="item" />
+
+				<!-- Comments Section -->
+				<div
+					v-if="item?.comments && item.comments.length > 0"
+					class="border-t border-gray-200 pt-4"
+				>
+					<label class="block text-sm font-medium text-gray-600 mb-2"
+						>{{ $t("Comments") }} ({{ item.comments.length }})</label
+					>
+					<div class="space-y-2 max-h-96 overflow-y-auto">
+						<div
+							v-for="(comment, idx) in item.comments"
+							:key="idx"
+							class="border border-gray-200 rounded-lg py-2 px-3 hover:shadow-md transition-shadow bg-white"
+						>
+							<!-- Comment Header -->
+							<div class="flex items-center justify-between mb-2">
+								<p class="font-medium text-gray-900">{{ comment.comment_by }}</p>
+								<div class="flex items-center gap-3">
+									<p class="text-xs text-gray-500">
+										{{ new Date(comment.creation).toLocaleDateString() }}
+										<span class="mx-1">•</span>
+										{{
+											new Date(comment.creation).toLocaleTimeString([], {
+												hour: "2-digit",
+												minute: "2-digit",
+											})
+										}}
+									</p>
+									<div
+										v-if="!comment.seen"
+										class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded font-medium"
+									>
+										{{ $t("Unseen") }}
+									</div>
+								</div>
+							</div>
+
+							<!-- Comment Content -->
+							<div
+								class="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none break-words"
+								v-html="comment.content"
+							></div>
+
+							<!-- <div class="mt-2 flex items-center gap-4 text-xs text-gray-500">
+								<span v-if="comment.comment_email">
+									<i class="fa fa-envelope mr-1"></i>{{ comment.comment_email }}
+								</span>
+								<span v-if="comment.comment_type">
+									<i class="fa fa-tag mr-1"></i>{{ comment.comment_type }}
+								</span>
+							</div> -->
 						</div>
 					</div>
 				</div>
@@ -329,9 +438,9 @@
 		<template #actions>
 			<div class="flex items-center justify-between gap-2">
 				<Button @click="openInErpNext" variant="solid" theme="blue">
-					<i class="fa fa-external-link mr-2"></i> View in ERPNext
+					<i class="fa fa-external-link mr-2"></i> {{ $t("View in ERPNext") }}
 				</Button>
-				<Button @click="close" variant="outline">Close</Button>
+				<Button @click="close" variant="outline">{{ $t("Close") }}</Button>
 			</div>
 		</template>
 	</Dialog>
@@ -341,12 +450,13 @@
 import { Dialog, Button, toast } from "frappe-ui";
 import { computed, ref } from "vue";
 import { call } from "frappe-ui";
+import ItemReorderSection from "./ItemReorderSection.vue";
 
 import { watch } from "vue";
 
 export default {
 	name: "ItemDetailsModal",
-	components: { Dialog, Button },
+	components: { Dialog, Button, ItemReorderSection },
 	props: {
 		modelValue: { type: Boolean, default: false },
 		item: { type: Object, required: true },
@@ -360,12 +470,16 @@ export default {
 
 		const priceLists = ref(null);
 		const loadingPrices = ref(false);
+		const editingSafetyStock = ref(false);
+		const safetyStockValue = ref(null);
+		const savingSafetyStock = ref(false);
 
 		watch(
 			() => props.item,
 			() => {
 				// Reset price lists when item changes
 				priceLists.value = null;
+				loadPriceLists();
 			}
 		);
 
@@ -434,6 +548,60 @@ export default {
 			window.open(url, "_blank");
 		}
 
+		async function saveSafetyStock() {
+			if (!props.item?.item_code) {
+				toast({
+					title: "Error",
+					text: "Item code not found",
+					icon: "x",
+					iconClasses: "text-red-600",
+				});
+				return;
+			}
+
+			if (safetyStockValue.value === null || safetyStockValue.value === undefined) {
+				toast({
+					title: "Error",
+					text: "Please enter a valid value",
+					icon: "x",
+					iconClasses: "text-red-600",
+				});
+				return;
+			}
+
+			savingSafetyStock.value = true;
+			try {
+				await call("frappe.client.set_value", {
+					doctype: "Item",
+					name: props.item.item_code,
+					fieldname: "safety_stock",
+					value: safetyStockValue.value,
+				});
+
+				// Update the local item object
+				props.item.safety_stock = safetyStockValue.value;
+				editingSafetyStock.value = false;
+				safetyStockValue.value = null;
+
+				toast({
+					title: "Success",
+					text: "Safety Stock updated successfully",
+					icon: "check",
+					iconClasses: "text-green-600",
+				});
+			} catch (error) {
+				console.error("Failed to update safety stock:", error);
+				toast({
+					title: "Error",
+					text: "Failed to update Safety Stock",
+					icon: "x",
+					iconClasses: "text-red-600",
+				});
+			} finally {
+				savingSafetyStock.value = false;
+			}
+		}
+
 		return {
 			open,
 			close,
@@ -442,6 +610,10 @@ export default {
 			priceLists,
 			loadingPrices,
 			loadPriceLists,
+			editingSafetyStock,
+			safetyStockValue,
+			savingSafetyStock,
+			saveSafetyStock,
 		};
 	},
 };

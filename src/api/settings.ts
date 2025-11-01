@@ -5,6 +5,9 @@ export type AppSettings = {
   ws_address?: string
   tts_api_key?: string
   package_item?: string
+  package_item_text?: string
+  deposit_item_text?: string
+  deposit_item_price?: number
 }
 
 /**

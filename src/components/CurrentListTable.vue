@@ -5,7 +5,9 @@
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<i class="fa fa-check-circle text-blue-500"></i>
-						<h2 class="text-lg font-semibold text-gray-900">Items to Print</h2>
+						<h2 class="text-lg font-semibold text-gray-900">
+							{{ $t("Items to Print") }}
+						</h2>
 						<span class="text-sm text-gray-500">({{ items.length }})</span>
 					</div>
 					<Button
@@ -25,21 +27,25 @@
 					<thead class="border-b border-gray-200 bg-gray-50">
 						<tr>
 							<th class="px-4 py-2 text-left font-semibold text-gray-700">
-								Item Name
+								{{ $t("Item Name") }}
 							</th>
 							<th class="px-4 py-2 text-left font-semibold text-gray-700">
-								Item Code
+								{{ $t("Item Code") }}
 							</th>
-							<th class="px-4 py-2 text-left font-semibold text-gray-700">UOM</th>
-							<th class="px-4 py-2 text-right font-semibold text-gray-700">Rate</th>
+							<th class="px-4 py-2 text-left font-semibold text-gray-700">
+								{{ $t("UOM") }}
+							</th>
+							<th class="px-4 py-2 text-right font-semibold text-gray-700">
+								{{ $t("Rate") }}
+							</th>
 							<th
 								v-if="showStockQty"
 								class="px-4 py-2 text-right font-semibold text-gray-700"
 							>
-								Stock Qty
+								{{ $t("Stock Qty") }}
 							</th>
 							<th class="px-4 py-2 text-center font-semibold text-gray-700">
-								Actions
+								{{ $t("Actions") }}
 							</th>
 						</tr>
 					</thead>

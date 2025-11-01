@@ -45,6 +45,9 @@ def get_settings() -> dict[str, Any]:
 			"tts_api_key": settings.get_password("tts_api_key"),  # Get actual password value
 			# NOTE: Ideally, it would be better to fetch it inside of python environment, but how about latency?
 			"package_item": settings.package_item,
+			"package_item_text": settings.package_item_text,
+			"deposit_item_text": settings.deposit_item_text,
+			"deposit_item_price": settings.deposit_item_price,
 		}
 
 		# Cache for 60 minutes
@@ -58,6 +61,9 @@ def get_settings() -> dict[str, Any]:
 			"ws_address": None,
 			"tts_api_key": None,
 			"package_item": None,
+			"package_item_text": "+ Bag fee (0.01)",
+			"deposit_item_text": "+ Deposit",
+			"deposit_item_price": 0.10,
 		}
 	except Exception as e:
 		frappe.log_error(f"Failed to fetch Label Maker Settings: {e!s}")

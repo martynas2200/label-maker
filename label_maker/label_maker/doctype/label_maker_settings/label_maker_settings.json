@@ -13,23 +13,63 @@
       "fieldname": "default_label_type",
       "label": "Default Label Type",
       "fieldtype": "Link",
-      "options": "Label Type"
+      "options": "Label Type",
+      "description": "NOT YET USED: Select the default label type to be used when printing labels."
     },
     {
       "fieldname": "ws_address",
       "label": "WebSocket Address",
-      "fieldtype": "Data"
+      "fieldtype": "Data",
+      "description": "Enter the full address (URL) of the WebSocket server used by the scanner for label printing. The server should send data in the format: BARCODE:<barcode_value>."
     },
     {
       "fieldname": "tts_api_key",
       "label": "TTS API Key",
-      "fieldtype": "Password"
+      "fieldtype": "Password",
+      "description": "Google Cloud Text-to-Speech API service key"
     },
     {
       "fieldname": "package_item",
-      "label": "Package Item",
+      "label": "Package/Bag Item for Weighted Items",
       "fieldtype": "Link",
-      "options": "Item"
+      "options": "Item",
+      "description": "Item used for packaging or bagging weighted items. (single-use bag fee)"
+    },
+    {
+      "fieldname": "package_item_text",
+      "label": "Package Item Text",
+      "fieldtype": "Data",
+      "default": "+ Bag fee (0.01)",
+      "description": "This text is added under the price of weighted item."
+    },
+    {
+      "fieldname": "deposit_item_text",
+      "label": "Deposit Item Text",
+      "fieldtype": "Data",
+      "default": "+ Deposit",
+      "description": "This text is added under the price if deposit_package_count > 0."
+    },
+    {
+      "fieldname": "deposit_item_price",
+      "label": "Deposit Item Price",
+      "fieldtype": "Float",
+      "default": 0.10,
+      "description": "Multiplier to apply to the deposit item price when calculating the total deposit amount"
+    },
+    {
+      "fieldname": "default_warehouse_group",
+      "label": "Default Warehouse Group",
+      "fieldtype": "Link",
+      "options": "Warehouse",
+      "filters": {
+        "is_group": 1
+      }
+    },
+    {
+      "fieldname": "default_warehouse",
+      "label": "Default Warehouse",
+      "fieldtype": "Link",
+      "options": "Warehouse"
     }
   ],
   "permissions": [
