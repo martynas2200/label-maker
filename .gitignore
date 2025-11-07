@@ -6,7 +6,7 @@ __pycache__/
 *.py~
 
 # Builds
-label_maker/www/labels_assets/
+labels_assets/
 label_maker/www/labels.html
 
 *.lock
@@ -39,6 +39,7 @@ env.bak/
 venv.bak/
 
 # Dependency directories
+node_modules
 node_modules/
 jspm_packages/
 

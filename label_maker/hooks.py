@@ -3,6 +3,7 @@ app_title = "Label Maker"
 app_publisher = "Martynas Miliauskas"
 app_description = "Create labels for your Items"
 app_email = "labels@ekranas.info"
+app_logo_url = "/assets/label_maker/logo.svg"
 app_license = "mit"
 
 # required_apps = []
@@ -17,20 +18,7 @@ add_to_apps_screen = [
 	}
 ]
 
-fixtures = [
-	{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_package_count"]]]},
-	{
-		"dt": "Custom DocPerm",
-		"filters": [
-			["role", "in", ["Label Maker User"]],
-			[
-				"parent",
-				"in",
-				["Item"],
-			],  # NOTE: consider adding Item Price later, but that will expose buying prices too
-		],
-	},
-]
+fixtures = [{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_package_count"]]]}]
 
 # Includes in <head>
 # ------------------
@@ -208,6 +196,9 @@ fixtures = [
 # Request Events
 # ----------------
 before_request = ["label_maker.utils.guard.ensure_label_maker_access"]
+
+# Custom permission logic: allow users with role "Label Maker User" to read Item
+has_permission = {"Item": "label_maker.item.permission.has_permission"}
 # after_request = ["label_maker.utils.after_request"]
 
 # Job Events

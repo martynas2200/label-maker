@@ -4,56 +4,28 @@ import Icons from "unplugin-icons/vite";
 import path from "path";
 import fs from "fs";
 
-// Plugin to rename and move the HTML file after build
 const setupWwwPlugin = () => {
 	return {
 		name: "setup-www",
 		closeBundle() {
-			// Move index.html to labels.html at www root
-			const builtHtml = path.resolve(__dirname, "label_maker/www/_build/index.html");
-			const targetHtml = path.resolve(__dirname, "label_maker/www/labels.html");
+			// Copy built index.html from public outDir to www/labels.html
+			const builtHtml = path.resolve(
+				__dirname,
+				"label_maker/public/labels_assets/index.html"
+			);
+			const wwwDir = path.resolve(__dirname, "label_maker/www");
+			const targetHtml = path.join(wwwDir, "labels.html");
 
 			if (fs.existsSync(builtHtml)) {
-				let html = fs.readFileSync(builtHtml, "utf-8");
-				// Fix asset paths from /_build/assets/ to /labels_assets/
-				// Use regex to handle query parameters
-				html = html.replace(/\/_build\/assets\//g, "/labels_assets/");
+				if (!fs.existsSync(wwwDir)) {
+					fs.mkdirSync(wwwDir, { recursive: true });
+				}
+				const html = fs.readFileSync(builtHtml, "utf-8");
 				fs.writeFileSync(targetHtml, html);
 				console.log("✓ Created www/labels.html");
-			}
-
-			// Also update CSS files to fix font references
-			const assetsSource = path.resolve(__dirname, "label_maker/www/_build/assets");
-			if (fs.existsSync(assetsSource)) {
-				const cssFiles = fs.readdirSync(assetsSource).filter((f) => f.endsWith(".css"));
-				cssFiles.forEach((cssFile) => {
-					const cssPath = path.join(assetsSource, cssFile);
-					let css = fs.readFileSync(cssPath, "utf-8");
-					// Replace /_build/assets/ with /labels_assets/ in CSS
-					css = css.replace(/\/_build\/assets\//g, "/labels_assets/");
-					fs.writeFileSync(cssPath, css);
-					console.log(`✓ Updated asset paths in ${cssFile}`);
-				});
-			}
-
-			// Move assets folder to labels_assets at www root
-			const assetsTarget = path.resolve(__dirname, "label_maker/www/labels_assets");
-
-			if (fs.existsSync(assetsSource)) {
-				// Remove old assets if exists
-				if (fs.existsSync(assetsTarget)) {
-					fs.rmSync(assetsTarget, { recursive: true });
-				}
-				// Move assets
-				fs.renameSync(assetsSource, assetsTarget);
-				console.log("✓ Moved assets to www/labels_assets");
-			}
-
-			// Clean up _build directory
-			const buildDir = path.resolve(__dirname, "label_maker/www/_build");
-			if (fs.existsSync(buildDir)) {
-				fs.rmSync(buildDir, { recursive: true });
-				console.log("✓ Cleaned up temporary build directory");
+				fs.unlinkSync(builtHtml); // Remove it after copying
+			} else {
+				console.error("✗ Built HTML file not found:", builtHtml);
 			}
 		},
 	};
@@ -71,8 +43,7 @@ export default defineConfig(({ command }) => ({
 		setupWwwPlugin(),
 	],
 	resolve: {},
-	// Use /_build/ as base during build (will be rewritten by plugin)
-	base: command === "build" ? "/_build/" : "/",
+	base: command === "build" ? "/assets/label_maker/labels_assets/" : "/",
 	css: {
 		postcss: "./postcss.config.js",
 	},
@@ -81,10 +52,8 @@ export default defineConfig(({ command }) => ({
 		include: [
 			"showdown",
 			"engine.io-client",
-			// Pre-bundle highlight.js entrypoints used by lowlight to force ESM resolution
 			"highlight.js/lib/core",
 			"highlight.js/lib/common",
-			// Pre-bundle interactjs to handle ESM interop for grid-layout-plus
 			"interactjs",
 		],
 		esbuildOptions: {
@@ -102,7 +71,8 @@ export default defineConfig(({ command }) => ({
 		},
 	},
 	build: {
-		outDir: "label_maker/www/_build",
+		// Build directly into public so Frappe serves assets at /assets/label_maker/labels_assets
+		outDir: "label_maker/public/labels_assets",
 		assetsDir: "assets",
 		emptyOutDir: true,
 		cssCodeSplit: false,
