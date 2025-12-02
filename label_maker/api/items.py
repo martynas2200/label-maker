@@ -5,12 +5,11 @@ Provides comprehensive item information including pricing, stock levels, and bar
 Permissions are based on user authentication and standard Frappe document permissions.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 import frappe
 from frappe import _
-from frappe.desk.reportview import get_count
 
 
 @frappe.whitelist()
@@ -30,18 +29,13 @@ def get_item(code_or_barcode: str) -> dict[str, Any] | None:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	if not code_or_barcode:
-		return None
 
-	normalized_input = _normalize_barcode(code_or_barcode)
-
-	# Try to find item by barcode first
-	item_code = _find_item_code_by_barcode(normalized_input)
+	# Look up barcode first
+	item_code = _find_item_code_by_barcode(code_or_barcode)
 	if not item_code:
 		# Fall back to using input as item code
 		item_code = code_or_barcode
 
-	# Fetch the item with all necessary details
 	return _fetch_item_details(item_code)
 
 
@@ -118,7 +112,7 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 			"Item",
 			filters=[["modified", ">=", today_start]],
 			fields=["name", "modified"],
-			order_by="`modified` desc",
+			order_by="modified desc",
 			limit_page_length=limit,
 		)
 
@@ -127,7 +121,7 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 			"Item Price",
 			filters=[["modified", ">=", today_start], ["selling", "=", 1]],
 			fields=["item_code", "modified"],
-			order_by="`modified` desc",
+			order_by="modified desc",
 			limit_page_length=limit,
 		)
 
@@ -184,11 +178,8 @@ def get_item_by_barcode(barcode: str) -> dict[str, Any] | None:
 	Raises:
 		frappe.PermissionError: If user is not logged in
 	"""
-	normalized_barcode = _normalize_barcode(barcode)
-	if not normalized_barcode:
-		return None
 
-	item_code = _find_item_code_by_barcode(normalized_barcode)
+	item_code = _find_item_code_by_barcode(barcode)
 	if item_code:
 		return _fetch_item_details(item_code)
 
@@ -426,21 +417,22 @@ def _normalize_barcode(barcode: str) -> str:
 	return barcode.strip().lstrip("0") or barcode.strip()
 
 
-def _find_item_code_by_barcode(normalized_barcode: str) -> list[str] | None:
+def _find_item_code_by_barcode(barcode: str) -> list[str] | None:
 	"""
 	Finds an item code by searching for a normalized barcode.
-
-	Args:
-		normalized_barcode: Normalized barcode string
 
 	Returns:
 		Item code if found, None otherwise
 	"""
+	normalized_barcode = _normalize_barcode(barcode)
 	if not normalized_barcode:
 		return None
 
 	try:
 		result = frappe.get_value("Item Barcode", filters={"barcode": normalized_barcode}, fieldname="parent")
+		if not result:
+			# Perhaps the zeros are significant - try original barcode
+			return frappe.get_value("Item Barcode", filters={"barcode": barcode}, fieldname="parent")
 		return result
 	except Exception as e:
 		frappe.log_error(f"Error finding item code by barcode {normalized_barcode}: {e!s}")

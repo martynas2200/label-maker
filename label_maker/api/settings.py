@@ -42,7 +42,7 @@ def get_settings() -> dict[str, Any]:
 		result = {
 			"default_label_type": settings.default_label_type,
 			"ws_address": settings.ws_address,
-			"tts_api_key": settings.get_password("tts_api_key"),  # Get actual password value
+			"tts_api_key": settings.get_password("tts_api_key") if settings.tts_api_key else None,
 			# NOTE: Ideally, it would be better to fetch it inside of python environment, but how about latency?
 			"package_item": settings.package_item,
 			"package_item_text": settings.package_item_text,

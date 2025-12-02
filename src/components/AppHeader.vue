@@ -67,9 +67,29 @@
 								group: $t('Navigation'),
 								items: [
 									{
-										icon: 'arrow-left-circle',
-										label: $t('Go back to Apps'),
-										onClick: this.goToApps,
+										icon: 'grid',
+										label: $t('Apps'),
+										submenu: apps.data?.map((app) => ({
+											label: app.title,
+											icon: app.logo,
+											component: h(
+												'a',
+												{
+													class: 'flex items-center gap-2 p-1.5 rounded hover:bg-surface-gray-2',
+													href: app.route,
+												},
+												[
+													h('img', { src: app.logo, class: 'size-6' }),
+													h(
+														'span',
+														{
+															class: 'max-w-18 text-sm w-full truncate',
+														},
+														app.title
+													),
+												]
+											),
+										})),
 									},
 									{
 										label: $t('Log out'),
@@ -110,7 +130,9 @@
 </template>
 
 <script>
+import { h } from "vue";
 import { Button, Dropdown, FeatherIcon } from "frappe-ui";
+import { apps } from "../resources/all";
 
 export default {
 	name: "AppHeader",
@@ -134,10 +156,11 @@ export default {
 		"clear",
 		"reconnect",
 	],
+	setup() {
+		apps.fetch();
+		return { apps, h };
+	},
 	methods: {
-		goToApps() {
-			window.location.href = "/apps";
-		},
 		logOut() {
 			window.location.href = "/logout";
 		},
