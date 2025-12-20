@@ -133,6 +133,7 @@
 import { h } from "vue";
 import { Button, Dropdown, FeatherIcon } from "frappe-ui";
 import { apps } from "../resources/all";
+import { getApi } from "../api/api";
 
 export default {
 	name: "AppHeader",
@@ -162,7 +163,14 @@ export default {
 	},
 	methods: {
 		logOut() {
-			window.location.href = "/logout";
+			getApi()
+				.call("logout")
+				.then(() => {
+					window.location.reload();
+				})
+				.catch((err) => {
+					console.error("Logout failed:", err);
+				});
 		},
 	},
 };
