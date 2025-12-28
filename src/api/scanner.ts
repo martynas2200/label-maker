@@ -176,30 +176,22 @@ function sendCommand(command: string) {
 
 function handleWindowFocus() {
   console.log('Window focused - sending ACTIVE')
-
-  // Clear any pending inactive timer
-  if (inactiveTimer) {
-    clearTimeout(inactiveTimer)
-    inactiveTimer = null
-  }
-
   sendCommand('ACTIVE')
 }
 
 function handleWindowBlur() {
   console.log('Window blurred - scheduling INACTIVE')
+  sendCommand('INACTIVE')
+}
 
-  // Clear any existing timer
-  if (inactiveTimer) {
-    clearTimeout(inactiveTimer)
-  }
-
-  // Send INACTIVE after 2 seconds delay
-  inactiveTimer = setTimeout(() => {
-    console.log('Sending INACTIVE after delay')
+function handleVisibilityChange() {
+  if (document.visibilityState === 'hidden') {
+    console.log('Visibility hidden - sending INACTIVE')
     sendCommand('INACTIVE')
-    inactiveTimer = null
-  }, 1000)
+  } else if (document.visibilityState === 'visible') {
+    console.log('Visibility visible - sending ACTIVE')
+    sendCommand('ACTIVE')
+  }
 }
 
 function setupWindowListeners() {
@@ -207,6 +199,9 @@ function setupWindowListeners() {
 
   window.addEventListener('focus', handleWindowFocus)
   window.addEventListener('blur', handleWindowBlur)
+  window.addEventListener('beforeunload', handleWindowBlur)
+  window.addEventListener('pagehide', handleWindowBlur)
+  document.addEventListener('visibilitychange', handleVisibilityChange)
   windowListenersAttached = true
 
   console.log('Window focus/blur listeners attached')
@@ -217,6 +212,9 @@ function removeWindowListeners() {
 
   window.removeEventListener('focus', handleWindowFocus)
   window.removeEventListener('blur', handleWindowBlur)
+  window.removeEventListener('beforeunload', handleWindowBlur)
+  window.removeEventListener('pagehide', handleWindowBlur)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
   windowListenersAttached = false
 
   console.log('Window focus/blur listeners removed')
