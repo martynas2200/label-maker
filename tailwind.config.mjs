@@ -1,4 +1,4 @@
-import frappeUiPreset from "./node_modules/frappe-ui/src/tailwind/preset.js";
+import frappeUiPreset from "frappe-ui/src/tailwind/preset";
 
 export default {
   presets: [frappeUiPreset],

@@ -123,6 +123,7 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 			fields=["item_code", "modified"],
 			order_by="modified desc",
 			limit_page_length=limit,
+			ignore_permissions=True,
 		)
 
 		# Create a dictionary to track the most recent modification time for each item

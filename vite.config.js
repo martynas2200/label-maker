@@ -16,16 +16,29 @@ const setupWwwPlugin = () => {
 			const wwwDir = path.resolve(__dirname, "label_maker/www");
 			const targetHtml = path.join(wwwDir, "labels.html");
 
+			console.log("[setup-www] builtHtml:", builtHtml);
+			console.log("[setup-www] wwwDir:", wwwDir);
+			console.log("[setup-www] targetHtml:", targetHtml);
+
 			if (fs.existsSync(builtHtml)) {
-				if (!fs.existsSync(wwwDir)) {
-					fs.mkdirSync(wwwDir, { recursive: true });
+				try {
+					console.log("[setup-www] Found built index.html, preparing to copy...");
+					if (!fs.existsSync(wwwDir)) {
+						console.log("[setup-www] www directory does not exist, creating...");
+						fs.mkdirSync(wwwDir, { recursive: true });
+					}
+					console.log("[setup-www] Reading built HTML...");
+					const html = fs.readFileSync(builtHtml, "utf-8");
+					console.log("[setup-www] Writing HTML to:", targetHtml);
+					fs.writeFileSync(targetHtml, html);
+					console.log("[setup-www] ✓ Created www/labels.html");
+					console.log("[setup-www] Removing original built index.html:", builtHtml);
+					fs.unlinkSync(builtHtml); // Remove it after copying
+				} catch (err) {
+					console.error("[setup-www] ✗ Failed to set up www/labels.html:", err);
 				}
-				const html = fs.readFileSync(builtHtml, "utf-8");
-				fs.writeFileSync(targetHtml, html);
-				console.log("✓ Created www/labels.html");
-				fs.unlinkSync(builtHtml); // Remove it after copying
 			} else {
-				console.error("✗ Built HTML file not found:", builtHtml);
+				console.error("[setup-www] ✗ Built HTML file not found:", builtHtml);
 			}
 		},
 	};
