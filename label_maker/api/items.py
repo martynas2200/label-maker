@@ -78,9 +78,7 @@ def get_items_by_codes(item_codes: list[str]) -> list[dict[str, Any]]:
 @frappe.whitelist()
 def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) -> list[dict[str, Any]]:
 	"""
-	Retrieves recently modified items.
-
-	Returns items modified today with their pricing and stock information.
+	Retrieves recently modified item prices, and returns items modified today with their pricing and stock information.
 	Results are cached in user session for 5 minutes unless force_refresh is True.
 
 	Args:
@@ -107,15 +105,6 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 		# Get today's date at 00:00:00
 		today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-		# Fetch recently modified items
-		items = frappe.get_list(
-			"Item",
-			filters=[["modified", ">=", today_start]],
-			fields=["name", "modified"],
-			order_by="modified desc",
-			limit_page_length=limit,
-		)
-
 		# Fetch items with recently modified prices
 		item_prices = frappe.get_list(
 			"Item Price",
@@ -126,30 +115,10 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 			ignore_permissions=True,
 		)
 
-		# Create a dictionary to track the most recent modification time for each item
-		item_modifications = {}
-
-		# Add items from Item table
-		for item in items:
-			item_code = item.get("name")
-			mod_time = item.get("modified")
-			item_modifications[item_code] = mod_time
-
-		# Add/update items from Item Price table
-		for price in item_prices:
-			item_code = price.get("item_code")
-			mod_time = price.get("modified")
-			# Keep the most recent modification time
-			if item_code not in item_modifications or mod_time > item_modifications[item_code]:
-				item_modifications[item_code] = mod_time
-
-		# Sort by modification time (most recent first)
-		sorted_items = sorted(item_modifications.items(), key=lambda x: x[1], reverse=True)[:limit]
-
 		# Fetch full details for each unique item
 		items_with_details = []
-		for item_code, _ in sorted_items:
-			details = _fetch_item_details(item_code)
+		for item in item_prices:
+			details = _fetch_item_details(item.get("item_code"))
 			if details:
 				items_with_details.append(details)
 
@@ -482,7 +451,7 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 		try:
 			comments = frappe.get_all(
 				"Comment",
-				filters={"reference_doctype": "Item", "reference_name": item_code},
+				filters={"reference_doctype": "Item", "reference_name": item_code, "comment_type": "Comment"},
 				fields=["*"],
 			)
 		except Exception as e:

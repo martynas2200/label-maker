@@ -50,7 +50,7 @@
 						:key="item.item_code"
 						class="hover:bg-gray-50 transition"
 					>
-						<td class="px-4 py-3">
+						<td class="px-4 py-3" @click="$emit('open-details', item)">
 							<code
 								class="bg-gray-100 px-2 py-1 rounded text-xs font-mono text-gray-900"
 								>{{ item.item_code }}</code
@@ -109,6 +109,6 @@ export default {
 		showStockQty: Boolean,
 		loading: Boolean,
 	},
-	emits: ["refresh", "add", "open-weigh"],
+	emits: ["refresh", "add", "open-weigh", "open-details"],
 };
 </script>
