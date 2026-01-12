@@ -390,6 +390,7 @@ def _normalize_barcode(barcode: str) -> str:
 def _find_item_code_by_barcode(barcode: str) -> list[str] | None:
 	"""
 	Finds an item code by searching for a normalized barcode.
+	Uses LIKE operator to match barcodes starting with the search string.
 
 	Returns:
 		Item code if found, None otherwise
@@ -399,11 +400,22 @@ def _find_item_code_by_barcode(barcode: str) -> list[str] | None:
 		return None
 
 	try:
-		result = frappe.get_value("Item Barcode", filters={"barcode": normalized_barcode}, fieldname="parent")
-		if not result:
-			# Perhaps the zeros are significant - try original barcode
-			return frappe.get_value("Item Barcode", filters={"barcode": barcode}, fieldname="parent")
-		return result
+		# Try original barcode as it is first
+		result = frappe.get_value("Item Barcode", filters={"barcode": barcode}, fieldname="parent")
+		if result:
+			return result
+		else:
+			result = frappe.db.sql(
+				"""
+			SELECT parent
+			FROM `tabItem Barcode`
+			WHERE barcode LIKE %(barcode)s
+			LIMIT 1
+		""",
+				{"barcode": f"%{normalized_barcode}"},
+				as_dict=False,
+			)
+			return result[0][0] if len(result) > 0 else None
 	except Exception as e:
 		frappe.log_error(f"Error finding item code by barcode {normalized_barcode}: {e!s}")
 		return None
