@@ -188,7 +188,7 @@ export default {
 			try {
 				printing.value = true;
 				const cfg = await settings.get();
-				if (!cfg?.default_label_type) throw new Error("Default label type not configured");
+				// if (!cfg?.default_label_type) throw new Error("Default label type not configured");
 				// await labels.printPackagedLabel({
 				//   item_code: props.item.item_code,
 				//   label_type: cfg.default_label_type,
@@ -201,9 +201,7 @@ export default {
 					// item_code: props.item.item_code,
 					...props.item,
 					total_price: totalPrice.value,
-					weight: isKgUom.value
-						? Number(weight.value || 0) / 1000
-						: Number(weight.value || 0),
+					weight: quantity.value,
 					expiry_date: expiryDate.value || undefined,
 					add_manufacturer: addManufacturer.value || false,
 					add_package_fee: addPackageFee.value || false,
