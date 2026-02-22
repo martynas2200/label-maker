@@ -1,8 +1,13 @@
 import { reactive } from 'vue'
+import mitt from 'mitt'
 
-type OnBarcode = (code: string) => void
-type OnStatus = (status: string) => void
+type Events = {
+  barcode: string
+  status: string
+  weight: number
+}
 
+const emitter = mitt<Events>()
 const state = reactive({
   connected: false,
   url: '',
@@ -12,17 +17,13 @@ const state = reactive({
   maxReconnectAttempts: 10
 })
 let ws: WebSocket | null = null
-let handler: OnBarcode | null = null
-let statusHandler: OnStatus | null = null
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let inactiveTimer: ReturnType<typeof setTimeout> | null = null
 let shouldReconnect = false
 let windowListenersAttached = false
 
-function connect(url: string, onBarcode: OnBarcode, onStatus?: OnStatus) {
-  disconnect()
-  handler = onBarcode
-  statusHandler = onStatus || null
+function connect(url: string) {
+  disconnect() // Ensure any existing connection is closed before starting a new one
   state.url = url
   shouldReconnect = true
   setupWindowListeners()
@@ -75,15 +76,20 @@ function attemptConnect() {
       const code = message.substring(8) // Remove "BARCODE:" prefix
       if (code) {
         state.last = code
-        handler && handler(code)
+        emitter.emit('barcode', code)
       }
     } else if (message.startsWith('STATUS:')) {
       const status = message.substring(7) // Remove "STATUS:" prefix
       handleStatus(status)
+    } else if (message.startsWith('WEIGHT:')) {
+      const weight = parseFloat(message.substring(7)) // Remove "WEIGHT:" prefix
+      if (!isNaN(weight)) {
+        emitter.emit('weight', weight)
+      }
     } else {
       // Backward compatibility: treat non-prefixed messages as barcodes
       state.last = message
-      handler && handler(message)
+      emitter.emit('barcode', message)
     }
   })
 }
@@ -110,7 +116,7 @@ function handleStatus(status: string) {
       break
   }
 
-  statusHandler && statusHandler(status)
+  emitter.emit('status', status)
 }
 
 function scheduleReconnect(immediate = false) {
@@ -227,8 +233,8 @@ function manualReconnect() {
   attemptConnect()
 }
 
-export function getScannerService() {
-  return { state, connect, disconnect, sendCommand, manualReconnect }
+export function getWebSocketService() {
+  return { state, connect, disconnect, sendCommand, manualReconnect, emitter }
 }
 
-export type ScannerService = ReturnType<typeof getScannerService>
+export type ScannerService = ReturnType<typeof getWebSocketService>

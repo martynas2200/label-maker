@@ -8,18 +8,20 @@
 						<div
 							v-if="wsConnected"
 							class="flex items-center gap-2 text-sm text-green-600"
+							@mouseover="showConnectedText = true"
+							@mouseleave="showConnectedText = false"
 						>
 							<span
 								class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"
 							></span>
-							{{ $t("Scanner connected") }}
+							<span v-show="showConnectedText">{{ $t("Scanner connected") }}</span>
 						</div>
 						<div
 							v-else-if="showReconnectButton"
 							class="flex items-center gap-2 text-sm text-red-600"
 						>
 							<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-							{{ $t("Scanner disconnected") }}
+							<span>{{ $t("Scanner disconnected") }}</span>
 						</div>
 					</div>
 				</div>
@@ -157,6 +159,16 @@ export default {
 		"clear",
 		"reconnect",
 	],
+	data() {
+		return {
+			showConnectedText: true,
+		};
+	},
+	mounted() {
+		setTimeout(() => {
+			this.showConnectedText = false;
+		}, 15000);
+	},
 	setup() {
 		apps.fetch();
 		return { apps, h };

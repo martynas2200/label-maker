@@ -8,16 +8,33 @@
 						<Input :value="item.item_name" readonly />
 					</div>
 					<div class="col-span-6 sm:col-span-4">
-						<label class="block text-sm text-gray-600 mb-1">{{
-							$t("Quantity (g/vnt.)")
-						}}</label>
-						<Input
-							v-model="weight"
-							type="text"
-							inputmode="numeric"
-							variant="outline"
-							@keydown.enter.prevent="print"
-						/>
+						<label
+							class="block text-sm mb-1 transition-colors"
+							:class="scaleActive ? 'text-green-600 font-semibold' : 'text-gray-600'"
+							>{{ $t("Quantity (g/vnt.)") }}</label
+						>
+						<div
+							class="transition-all rounded-md"
+							:class="
+								scaleActive
+									? 'ring-2 ring-green-500 shadow-md shadow-green-100'
+									: ''
+							"
+						>
+							<Input
+								v-model="weight"
+								type="text"
+								inputmode="numeric"
+								variant="outline"
+								:readonly="scaleActive"
+								:class="
+									scaleActive
+										? 'text-xl font-bold text-green-700 text-center'
+										: ''
+								"
+								@keydown.enter.prevent="print"
+							/>
+						</div>
 					</div>
 					<div class="col-span-6 sm:col-span-4">
 						<label class="block text-sm text-gray-600 mb-1"
@@ -56,10 +73,9 @@
 							v-model="addPackageFee"
 							:label="$t('Add package fee')"
 						/>
-						<!-- TODO: show an error/disable if the settings are not set -->
 					</div>
-					<div class="col-span-12 sm:col-span-6" v-if="showKeypad">
-						<div class="grid grid-cols-3 gap-2">
+					<div class="col-span-12 sm:col-span-6">
+						<div class="grid grid-cols-3 gap-2" v-if="showKeypad">
 							<Button
 								class="key py-5"
 								v-for="n in ['7', '8', '9', '4', '5', '6', '1', '2', '3']"
@@ -74,6 +90,27 @@
 							<Button class="key py-5" appearance="danger" @click="key('d')"
 								>⌫</Button
 							>
+						</div>
+						<!-- Scale indicator -->
+						<div class="grid items-center gap-2 text-sm my-2">
+							<span
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium"
+								:class="
+									scaleReceivedWeight && !scaleDisabled
+										? 'bg-green-100 text-green-700'
+										: 'bg-gray-100 text-gray-400'
+								"
+							>
+								<template v-if="scaleReceivedWeight">{{
+									$t("Scale active")
+								}}</template>
+								<template v-else>{{ $t("Waiting for scale…") }}</template>
+							</span>
+							<Checkbox
+								v-if="scaleReceivedWeight"
+								v-model="scaleDisabled"
+								:label="$t('Disable scale')"
+							/>
 						</div>
 					</div>
 				</div>
@@ -102,6 +139,7 @@ import { ref, computed, watch, onMounted } from "vue";
 import { getSettingsService } from "../api/settings";
 import { LabelGenerator } from "./../helpers/labelGenerator";
 import { toast } from "./../helpers/toast";
+import { useScaleWeight } from "../composables/useScaleWeight";
 export default {
 	name: "WeightLabelModal",
 	components: { Dialog, Input, Button, Checkbox },
@@ -168,7 +206,24 @@ export default {
 			return quantity.value * Number(pricePerKg.value || 0);
 		});
 
-		const showKeypad = ref(true);
+		// Scale integration — listens for weight events only while the modal is open
+		const { scaleWeight } = useScaleWeight(open);
+		const scaleReceivedWeight = ref(false);
+		const scaleDisabled = ref(false);
+
+		// showKeypad: visible when no scale reading has arrived yet, or user has disabled the scale
+		const scaleActive = computed(() => scaleReceivedWeight.value && !scaleDisabled.value);
+		const showKeypad = computed(() => !scaleActive.value);
+
+		watch(scaleWeight, (g) => {
+			if (g !== null && g > 0) {
+				scaleReceivedWeight.value = true;
+				if (!scaleDisabled.value) {
+					// scaleWeight is in grams; store as integer string to match keypad input format
+					weight.value = String(Math.round(g));
+				}
+			}
+		});
 
 		function key(k) {
 			if (k === "c") {
@@ -234,6 +289,8 @@ export default {
 					pricePerKg.value = props.item?.standard_rate || 0;
 					addManufacturer.value = false;
 					addPackageFee.value = true;
+					scaleReceivedWeight.value = false;
+					scaleDisabled.value = false;
 					console.log("open is true - form reset, item:", props.item);
 				}
 			},
@@ -263,11 +320,16 @@ export default {
 
 		return {
 			open,
+			scaleWeight,
+			scaleActive,
+			scaleReceivedWeight,
+			scaleDisabled,
 			weight,
 			expiryDate,
 			addManufacturer,
 			addPackageFee,
 			printing,
+			settings,
 			canPrint,
 			showKeypad,
 			pricePerKg,

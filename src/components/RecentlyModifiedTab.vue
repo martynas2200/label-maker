@@ -17,7 +17,9 @@
 			<div class="text-gray-400 text-4xl mb-2">
 				<i class="fa fa-inbox"></i>
 			</div>
-			<p class="text-gray-500">{{ $t("No recently modified items") }}</p>
+			<p class="text-gray-500">
+				{{ $t("No recently modified items (based on their prices)") }}
+			</p>
 		</div>
 
 		<div v-else class="overflow-x-auto">

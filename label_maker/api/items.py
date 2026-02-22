@@ -247,50 +247,6 @@ def get_item_selling_price(item_code: str, price_list: str | None = None) -> flo
 
 
 @frappe.whitelist()
-def get_item_buying_prices(item_code: str, limit: int = 5) -> list[dict[str, Any]]:
-	"""
-	Retrieves the last buying prices for an item.
-
-	Args:
-		item_code: Item code to get prices for
-		limit: Number of recent prices to retrieve (default 5)
-
-	Returns:
-		list of dictionaries containing price information, ordered by most recent first
-
-	Raises:
-		frappe.PermissionError: If user is not logged in
-	"""
-	if not item_code:
-		return []
-
-	try:
-		# Fetch buying prices with additional details
-		buying_prices = frappe.db.sql(
-			"""
-			SELECT
-				price_list,
-				price_list_rate,
-				valid_from,
-				valid_upto,
-				modified
-			FROM `tabItem Price`
-			WHERE item_code = %(item_code)s
-				AND buying = 1
-			ORDER BY modified DESC
-			LIMIT %(limit)s
-		""",
-			{"item_code": item_code, "limit": limit},
-			as_dict=True,
-		)
-
-		return buying_prices
-	except Exception as e:
-		frappe.log_error(f"Failed to fetch buying prices for item {item_code}: {e!s}")
-		return []
-
-
-@frappe.whitelist()
 def get_item_price_lists(item_code: str) -> dict[str, Any]:
 	"""
 	Retrieves all price lists (both buying and selling) for an item.
@@ -300,8 +256,7 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 
 	Returns:
 		dictionary containing:
-		- selling_prices: list of selling price entries
-		- buying_prices: list of buying price entries
+		- prices: list of all price entries (both buying and selling)
 		- current_selling_price: Currently valid selling price (if any)
 		- current_buying_price: Most recent buying price (if any)
 
@@ -310,8 +265,7 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 	"""
 	if not item_code:
 		return {
-			"selling_prices": [],
-			"buying_prices": [],
+			"prices": [],
 			"current_selling_price": None,
 			"current_buying_price": None,
 		}
@@ -346,35 +300,24 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 			as_dict=True,
 		)
 
-		selling_prices = [p for p in all_prices if p.get("selling") == 1]
 		current_selling = next(
 			(p for p in all_prices if p.get("is_valid") == 1 and p.get("selling") == 1), None
 		)
 
-		current_buying = None
-		buying_prices = []
-
-		if frappe.has_permission("Item Price", "read"):
-			buying_prices = [p for p in all_prices if p.get("buying") == 1]
-			current_buying = next(
-				(p for p in all_prices if p.get("is_valid") == 1 and p.get("buying") == 1), None
-			)
+		if not frappe.has_permission("Item Price", "read"):
+			all_prices = [p for p in all_prices if p.get("selling") == 1]
 
 		return {
 			"item_code": item_code,
-			"selling_prices": selling_prices,
-			"buying_prices": buying_prices,
+			"prices": all_prices,
 			"current_selling_price": current_selling,
-			"current_buying_price": current_buying,
 		}
 	except Exception as e:
 		frappe.log_error(f"Failed to fetch price lists for item {item_code}: {e!s}")
 		return {
 			"item_code": item_code,
-			"selling_prices": [],
-			"buying_prices": [],
+			"prices": [],
 			"current_selling_price": None,
-			"current_buying_price": None,
 		}
 
 
@@ -478,6 +421,9 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 			"suppliers": [s.supplier for s in item.supplier_items] if hasattr(item, "supplier_items") else [],
 			"stock_uom": item.stock_uom,
 			"standard_rate": standard_rate,
+			"last_purchase_rate": item.last_purchase_rate
+			if hasattr(item, "last_purchase_rate") and frappe.has_permission("Item Price", "read")
+			else None,
 			"safety_stock": item.safety_stock if hasattr(item, "safety_stock") else 0,
 			"comments": comments,
 			"reorder_levels": item.get("reorder_levels") if hasattr(item, "reorder_levels") else [],

@@ -106,7 +106,7 @@
 import { Button, Tabs } from "frappe-ui";
 import { onMounted, onUnmounted, ref, computed, watch, nextTick, reactive } from "vue";
 import { getItemService } from "./api/items";
-import { getScannerService } from "./api/scanner";
+import { getWebSocketService } from "./api/websocket";
 import { getLabelService } from "./api/labels";
 import { getSettingsService } from "./api/settings";
 import { getTTSService } from "./api/tts";
@@ -139,7 +139,7 @@ export default {
 	setup() {
 		const { t } = useI18n();
 		const itemService = getItemService();
-		const scanner = getScannerService();
+		const websocket = getWebSocketService();
 		const labels = getLabelService();
 		const settingsSvc = getSettingsService();
 		const tts = getTTSService();
@@ -174,13 +174,18 @@ export default {
 		let dimTimer = null;
 		let autoRefreshTimer = null;
 
-		// Computed
-		const wsConnected = computed(() => scanner.state.connected);
+		// WebSocket event handlers
+		const handleBarcode = (code) => {
+			barcode.value = code;
+			onScan();
+		};
+
+		const wsConnected = computed(() => websocket.state.connected);
 		const showReconnectButton = computed(() => {
 			return (
-				!scanner.state.connected &&
-				scanner.state.reconnectAttempts >= scanner.state.maxReconnectAttempts &&
-				scanner.state.url !== ""
+				!websocket.state.connected &&
+				websocket.state.reconnectAttempts >= websocket.state.maxReconnectAttempts &&
+				websocket.state.url !== ""
 			);
 		});
 		const isModifiedTabVisible = computed(() => {
@@ -509,11 +514,11 @@ export default {
 		 */
 		function handleReconnect() {
 			toast({
-				title: "Reconnecting scanner...",
+				title: "Reconnecting websocket...",
 				icon: "refresh-cw",
 				timeout: 2,
 			});
-			scanner.manualReconnect();
+			websocket.manualReconnect();
 		}
 
 		/**
@@ -523,14 +528,13 @@ export default {
 			try {
 				const cfg = await settingsSvc.get();
 
-				// Connect scanner if configured
+				// Connect websocket if configured
 				if (cfg?.ws_address) {
-					scanner.connect(cfg.ws_address, (code) => {
-						barcode.value = code;
-						onScan();
-					});
+					websocket.connect(cfg.ws_address);
+					// Listen to barcode events
+					websocket.emitter.on("barcode", handleBarcode);
 				} else {
-					// If no scanner, focus input for manual entry
+					// If no websocket, focus input for manual entry
 					showInputManually.value = true;
 				}
 
@@ -540,7 +544,7 @@ export default {
 				// Start auto-refresh timer
 				startAutoRefresh();
 
-				// Focus input if no scanner
+				// Focus input if no websocket
 				if (!wsConnected.value) {
 					focusInput();
 				}
@@ -576,6 +580,8 @@ export default {
 			if (dimTimer) {
 				clearTimeout(dimTimer);
 			}
+			// Remove WebSocket listeners
+			websocket.emitter.off("barcode", handleBarcode);
 		});
 
 		return {

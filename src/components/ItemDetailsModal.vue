@@ -47,7 +47,6 @@
 								:key="idx"
 								class="inline-flex items-center px-3 py-1.5 rounded-md bg-gray-100 text-gray-900 text-sm font-mono border border-gray-200"
 							>
-								<i class="fa fa-barcode mr-2 text-gray-500"></i>
 								{{ bc.barcode || bc }}
 							</span>
 						</div>
@@ -68,7 +67,6 @@
 								:key="idx"
 								class="inline-flex items-center px-3 py-1.5 rounded-md bg-blue-50 text-blue-900 text-sm border border-blue-200"
 							>
-								<i class="fa fa-building mr-2 text-blue-500"></i>
 								{{ supplier.supplier || supplier }}
 							</span>
 						</div>
@@ -163,16 +161,20 @@
 						</Button>
 					</div>
 
-					<div v-if="priceLists" class="space-y-4">
-						<!-- Current Prices Summary -->
-						<div class="grid grid-cols-2 gap-4 p-3 bg-blue-50 rounded-lg">
+					<div class="space-y-4">
+						<div class="grid grid-cols-2 gap-4 p-3 bg-cyan-100 rounded-lg">
 							<div>
 								<p class="text-xs font-medium text-gray-600">
 									{{ $t("Current Selling Price") }}
 								</p>
-								<p class="text-lg font-semibold text-gray-900">
+								<p
+									class="text-lg font-semibold text-gray-900"
+									v-if="priceLists && priceLists.current_selling_price"
+								>
 									{{
-										priceLists.current_selling_price
+										priceLists &&
+										priceLists.current_selling_price &&
+										priceLists.current_selling_price.price_list_rate !== null
 											? `€${priceLists.current_selling_price.price_list_rate.toFixed(
 													2
 											  )}`
@@ -180,114 +182,27 @@
 									}}
 								</p>
 								<p
-									v-if="priceLists.current_selling_price"
+									v-if="priceLists && priceLists.current_selling_price"
 									class="text-xs text-gray-500"
 								>
 									{{ priceLists.current_selling_price.price_list }}
 								</p>
 							</div>
-							<div v-if="priceLists.current_buying_price !== null">
+							<div v-if="item.last_purchase_rate !== null">
 								<p class="text-xs font-medium text-gray-600">
-									{{ $t("Current Buying Price") }}
+									{{ $t("Last Purchase Rate") }}
 								</p>
 								<p class="text-lg font-semibold text-gray-900">
 									{{
-										priceLists.current_buying_price
-											? `€${priceLists.current_buying_price.price_list_rate.toFixed(
-													2
-											  )}`
+										item.last_purchase_rate
+											? `€${item.last_purchase_rate.toFixed(2)}`
 											: "N/A"
 									}}
 								</p>
-								<p
-									v-if="priceLists.current_buying_price"
-									class="text-xs text-gray-500"
-								>
-									{{ priceLists.current_buying_price.price_list }}
-								</p>
 							</div>
 						</div>
 
-						<!-- Selling Prices Table -->
-						<div v-if="priceLists.selling_prices.length > 0">
-							<h5 class="text-sm font-semibold text-gray-700 mb-2">
-								{{ $t("Selling Prices") }}
-							</h5>
-							<div class="overflow-x-auto">
-								<table class="min-w-full divide-y divide-gray-200 text-sm">
-									<thead class="bg-gray-50">
-										<tr>
-											<th
-												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
-											>
-												{{ $t("Price List") }}
-											</th>
-											<th
-												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
-											>
-												{{ $t("Rate") }}
-											</th>
-											<th
-												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
-											>
-												{{ $t("Valid From") }}
-											</th>
-											<th
-												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
-											>
-												{{ $t("Valid Until") }}
-											</th>
-											<th
-												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
-											>
-												{{ $t("Status") }}
-											</th>
-										</tr>
-									</thead>
-									<tbody class="bg-white divide-y divide-gray-200">
-										<tr
-											v-for="price in priceLists.selling_prices"
-											:key="price.name"
-											:class="{ 'bg-green-50': price.is_valid }"
-										>
-											<td class="px-3 py-2 text-gray-900">
-												{{ price.price_list }}
-											</td>
-											<td class="px-3 py-2 text-gray-900 font-medium">
-												{{ price.currency }}
-												{{ price.price_list_rate.toFixed(2) }}
-											</td>
-											<td class="px-3 py-2 text-gray-600">
-												{{ price.valid_from || "-" }}
-											</td>
-											<td class="px-3 py-2 text-gray-600">
-												{{ price.valid_upto || "-" }}
-											</td>
-											<td class="px-3 py-2">
-												<span
-													v-if="price.is_valid"
-													class="px-2 py-1 text-xs rounded bg-green-100 text-green-800"
-												>
-													{{ $t("Active") }}
-												</span>
-												<span
-													v-else
-													class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-600"
-												>
-													{{ $t("Inactive") }}
-												</span>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-
-						<!-- Buying Prices Table -->
-						<div v-if="priceLists.buying_prices.length > 0">
-							<h5 class="text-sm font-semibold text-gray-700 mb-2">
-								{{ $t("Buying Prices") }}
-							</h5>
+						<div v-if="priceLists && priceLists.prices.length > 0">
 							<div class="overflow-x-auto">
 								<table class="min-w-full divide-y divide-gray-200 text-sm">
 									<thead class="bg-gray-50">
@@ -312,18 +227,17 @@
 											>
 												{{ $t("Modified") }}
 											</th>
-											<th
-												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
-											>
-												{{ $t("Status") }}
-											</th>
 										</tr>
 									</thead>
 									<tbody class="bg-white divide-y divide-gray-200">
 										<tr
-											v-for="price in priceLists.buying_prices"
+											v-for="price in priceLists.prices"
 											:key="price.name"
-											:class="{ 'bg-green-50': price.is_valid }"
+											:class="{
+												'bg-yellow-50': price.buying === 1,
+												'bg-blue-50': price.selling === 1,
+												'opacity-30': !price.is_valid,
+											}"
 										>
 											<td class="px-3 py-2 text-gray-900">
 												{{ price.price_list }}
@@ -343,32 +257,13 @@
 											<td class="px-3 py-2 text-gray-600">
 												{{ formatDate(price.modified) }}
 											</td>
-											<td class="px-3 py-2">
-												<span
-													v-if="price.is_valid"
-													class="px-2 py-1 text-xs rounded bg-green-100 text-green-800"
-												>
-													{{ $t("Active") }}
-												</span>
-												<span
-													v-else
-													class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-600"
-												>
-													{{ $t("Inactive") }}
-												</span>
-											</td>
 										</tr>
 									</tbody>
 								</table>
 							</div>
 						</div>
 
-						<div
-							v-if="
-								priceLists.selling_prices.length === 0 &&
-								priceLists.buying_prices.length === 0
-							"
-						>
+						<div v-if="priceLists && priceLists.prices.length === 0">
 							<p class="text-sm text-gray-500 text-center py-4">
 								{{ $t("No price lists found for this item.") }}
 							</p>
@@ -416,20 +311,10 @@
 								</div>
 							</div>
 
-							<!-- Comment Content -->
 							<div
 								class="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none break-words"
 								v-html="comment.content"
 							></div>
-
-							<!-- <div class="mt-2 flex items-center gap-4 text-xs text-gray-500">
-								<span v-if="comment.comment_email">
-									<i class="fa fa-envelope mr-1"></i>{{ comment.comment_email }}
-								</span>
-								<span v-if="comment.comment_type">
-									<i class="fa fa-tag mr-1"></i>{{ comment.comment_type }}
-								</span>
-							</div> -->
 						</div>
 					</div>
 				</div>
@@ -521,7 +406,7 @@ export default {
 		function formatDate(dateString) {
 			if (!dateString) return "N/A";
 			try {
-				return new Date(dateString).toLocaleDateString("en-US", {
+				return new Date(dateString).toLocaleDateString(window.navigator.language, {
 					year: "numeric",
 					month: "short",
 					day: "numeric",

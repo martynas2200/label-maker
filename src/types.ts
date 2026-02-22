@@ -4,7 +4,7 @@ export interface Item {
   item_name: string;
   item_group: string;
   stock_uom: string;
-  deposit_package_count: number; //TODO: Add a frappe custom field in the app
+  deposit_package_count: number; //TODO: Export this custom field in the app
   image: string;
   disabled: boolean;
   allow_alternative_item: boolean;
