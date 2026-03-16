@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tiptap/vue-3": "^2.26.4",
     "frappe-ui": "~0.1.248",
     "mitt": "^3.0.1",
     "vue": "~3.5.26",

@@ -7,7 +7,7 @@ import fs from "fs";
 const setupWwwPlugin = () => {
 	return {
 		name: "setup-www",
-		closeBundle() {
+		writeBundle() {
 			// Copy built index.html from public outDir to www/labels.html
 			const builtHtml = path.resolve(
 				__dirname,
@@ -20,25 +20,25 @@ const setupWwwPlugin = () => {
 			console.log("[setup-www] wwwDir:", wwwDir);
 			console.log("[setup-www] targetHtml:", targetHtml);
 
-			if (fs.existsSync(builtHtml)) {
-				try {
-					console.log("[setup-www] Found built index.html, preparing to copy...");
-					if (!fs.existsSync(wwwDir)) {
-						console.log("[setup-www] www directory does not exist, creating...");
-						fs.mkdirSync(wwwDir, { recursive: true });
-					}
-					console.log("[setup-www] Reading built HTML...");
-					const html = fs.readFileSync(builtHtml, "utf-8");
-					console.log("[setup-www] Writing HTML to:", targetHtml);
-					fs.writeFileSync(targetHtml, html);
-					console.log("[setup-www] ✓ Created www/labels.html");
-					console.log("[setup-www] Removing original built index.html:", builtHtml);
-					fs.unlinkSync(builtHtml); // Remove it after copying
-				} catch (err) {
-					console.error("[setup-www] ✗ Failed to set up www/labels.html:", err);
+			if (!fs.existsSync(builtHtml)) {
+				return;
+			}
+
+			try {
+				console.log("[setup-www] Found built index.html, preparing to copy...");
+				if (!fs.existsSync(wwwDir)) {
+					console.log("[setup-www] www directory does not exist, creating...");
+					fs.mkdirSync(wwwDir, { recursive: true });
 				}
-			} else {
-				console.error("[setup-www] ✗ Built HTML file not found:", builtHtml);
+				console.log("[setup-www] Reading built HTML...");
+				const html = fs.readFileSync(builtHtml, "utf-8");
+				console.log("[setup-www] Writing HTML to:", targetHtml);
+				fs.writeFileSync(targetHtml, html);
+				console.log("[setup-www] ✓ Created www/labels.html");
+				console.log("[setup-www] Removing original built index.html:", builtHtml);
+				fs.unlinkSync(builtHtml); // Remove it after copying
+			} catch (err) {
+				console.error("[setup-www] ✗ Failed to set up www/labels.html:", err);
 			}
 		},
 	};
