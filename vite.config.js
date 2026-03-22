@@ -55,17 +55,6 @@ export default defineConfig(({ command }) => ({
 		}),
 		setupWwwPlugin(),
 	],
-	resolve: {
-		alias: [
-			...["@tiptap/core", "@tiptap/vue-3"].reduce((acc, pkg) => {
-				const entry = path.resolve(__dirname, `node_modules/${pkg}/dist/index.js`);
-				if (fs.existsSync(entry)) {
-					acc.push({ find: pkg, replacement: entry });
-				}
-				return acc;
-			}, []),
-		],
-	},
 	base: command === "build" ? "/assets/label_maker/labels_assets/" : "/",
 	css: {
 		postcss: "./postcss.config.js",
