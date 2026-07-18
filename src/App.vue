@@ -151,8 +151,16 @@ export default {
 
 		// State
 		const state = reactive({ index: 0 }); // Start with scanned tab
-		const showStockQty = ref(false);
-		const speakPrice = ref(true);
+		const showStockQty = ref(
+			localStorage.getItem("showStockQty") !== null
+				? localStorage.getItem("showStockQty") === "true"
+				: false
+		);
+		const speakPrice = ref(
+			localStorage.getItem("speakPrice") !== null
+				? localStorage.getItem("speakPrice") === "true"
+				: true
+		);
 		const currentList = ref([]); // Items ready to print
 		const recentlyScanned = ref(
 			localStorage.getItem("recentlyScanned")
@@ -558,6 +566,10 @@ export default {
 				});
 			}
 		});
+
+		// Persist settings to localStorage
+		watch(showStockQty, (v) => localStorage.setItem("showStockQty", v));
+		watch(speakPrice, (v) => localStorage.setItem("speakPrice", v));
 
 		// Auto-focus input when toggling manual input
 		watch(showInputManually, (v) => {
