@@ -7,6 +7,7 @@
 			v-model:show-stock-qty="showStockQty"
 			v-model:show-input-manually="showInputManually"
 			v-model:speak-price="speakPrice"
+			v-model:speak-quantity="speakQuantity"
 			v-model:cards-view="cardsView"
 			:current-list-length="currentList.length"
 			:printing="printing"
@@ -160,6 +161,11 @@ export default {
 			localStorage.getItem("speakPrice") !== null
 				? localStorage.getItem("speakPrice") === "true"
 				: true
+		);
+		const speakQuantity = ref(
+			localStorage.getItem("speakQuantity") !== null
+				? localStorage.getItem("speakQuantity") === "true"
+				: false
 		);
 		const currentList = ref([]); // Items ready to print
 		const recentlyScanned = ref(
@@ -329,8 +335,13 @@ export default {
 				// Trigger dim effect for other items
 				triggerDimEffect();
 
-				// Speak price if enabled
-				if (speakPrice.value) {
+				// Speak quantity if enabled (overrides speakPrice)
+				if (speakQuantity.value) {
+					const qty = item.stock_qty || 0;
+					if (qty > 0) {
+						tts.speak(tts.numberToWords(qty));
+					}
+				} else if (speakPrice.value) {
 					const price = isPackaged ? item.total_price : item.standard_rate || 0;
 					if (price > 0) {
 						tts.speak(tts.digitsToPrice(price));
@@ -570,6 +581,7 @@ export default {
 		// Persist settings to localStorage
 		watch(showStockQty, (v) => localStorage.setItem("showStockQty", v));
 		watch(speakPrice, (v) => localStorage.setItem("speakPrice", v));
+		watch(speakQuantity, (v) => localStorage.setItem("speakQuantity", v));
 
 		// Auto-focus input when toggling manual input
 		watch(showInputManually, (v) => {
@@ -601,6 +613,7 @@ export default {
 			state,
 			showStockQty,
 			speakPrice,
+			speakQuantity,
 			currentList,
 			recentlyScanned,
 			recentlyModified,

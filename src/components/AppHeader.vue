@@ -58,6 +58,12 @@
 										onClick: (val) => $emit('update:speakPrice', val),
 									},
 									{
+										label: $t('Speak Quantity'),
+										switch: true,
+										switchValue: speakQuantity,
+										onClick: (val) => $emit('update:speakQuantity', val),
+									},
+									{
 										label: $t('Cards View'),
 										switch: true,
 										switchValue: cardsView,
@@ -146,6 +152,7 @@ export default {
 		showStockQty: Boolean,
 		showInputManually: Boolean,
 		speakPrice: Boolean,
+		speakQuantity: Boolean,
 		cardsView: Boolean,
 		currentListLength: Number,
 		printing: Boolean,
@@ -154,6 +161,7 @@ export default {
 		"update:showStockQty",
 		"update:showInputManually",
 		"update:speakPrice",
+		"update:speakQuantity",
 		"update:cardsView",
 		"print",
 		"clear",
