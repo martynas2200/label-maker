@@ -4,7 +4,13 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
 					<div>
-						<h1 class="text-2xl font-bold text-gray-900">{{ $t("Labels") }}</h1>
+						<!-- TODO: Consider passing a prop for title instead -->
+						<h1 class="text-2xl font-bold text-gray-900" v-if="!stockTakingMode">
+							{{ $t("Labels") }}
+						</h1>
+						<h1 class="text-2xl font-bold text-gray-900" v-else>
+							{{ $t("Stock Taking") }}
+						</h1>
 						<div
 							v-if="wsConnected"
 							class="flex items-center gap-2 text-sm text-green-600"
@@ -69,6 +75,12 @@
 										switchValue: cardsView,
 										onClick: (val) => $emit('update:cardsView', val),
 									},
+									{
+										label: !stockTakingMode ? $t('Stock Take') : $t('Labels'),
+										icon: 'clipboard',
+										onClick: () =>
+											$emit('update:stockTakingMode', !stockTakingMode),
+									},
 								],
 							},
 							{
@@ -113,7 +125,7 @@
 						</Button>
 					</Dropdown>
 					<Button
-						v-if="currentListLength > 0 && cardsView"
+						v-if="!stockTakingMode && currentListLength > 0 && cardsView"
 						size="sm"
 						@click="$emit('clear')"
 						variant="subtle"
@@ -122,6 +134,7 @@
 						<i class="fa fa-trash mr-2"></i>{{ $t("Clear") }}
 					</Button>
 					<Button
+						v-if="!stockTakingMode"
 						:loading="printing"
 						@click="$emit('print')"
 						:disabled="currentListLength === 0"
@@ -154,6 +167,7 @@ export default {
 		speakPrice: Boolean,
 		speakQuantity: Boolean,
 		cardsView: Boolean,
+		stockTakingMode: Boolean,
 		currentListLength: Number,
 		printing: Boolean,
 	},
@@ -163,6 +177,7 @@ export default {
 		"update:speakPrice",
 		"update:speakQuantity",
 		"update:cardsView",
+		"update:stockTakingMode",
 		"print",
 		"clear",
 		"reconnect",

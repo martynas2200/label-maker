@@ -1,0 +1,91 @@
+{
+ "doctype": "DocType",
+ "name": "Stock Check Log",
+ "module": "Label Maker",
+ "custom": 0,
+ "is_submittable": 0,
+ "track_changes": 1,
+ "autoname": "hash",
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "label": "Item Code",
+   "fieldtype": "Link",
+   "options": "Item",
+   "reqd": 1,
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "item_name",
+   "label": "Item Name",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "barcode",
+   "label": "Barcode",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "system_qty",
+   "label": "System Qty",
+   "fieldtype": "Float",
+   "description": "Stock quantity at the time of check"
+  },
+  {
+   "fieldname": "actual_qty",
+   "label": "Actual Qty",
+   "fieldtype": "Float",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "difference",
+   "label": "Difference",
+   "fieldtype": "Float",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "checked_by",
+   "label": "Checked By",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checked_at",
+   "label": "Checked At",
+   "fieldtype": "Datetime",
+   "read_only": 1,
+   "in_list_view": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Label Maker User",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "sort_field": "checked_at",
+ "sort_order": "DESC",
+ "title_field": "item_code"
+}

@@ -9,6 +9,7 @@
 			v-model:speak-price="speakPrice"
 			v-model:speak-quantity="speakQuantity"
 			v-model:cards-view="cardsView"
+			v-model:stock-taking-mode="stockTakingMode"
 			:current-list-length="currentList.length"
 			:printing="printing"
 			@print="onPrint"
@@ -18,71 +19,77 @@
 
 		<!-- Main Content -->
 		<div class="max-w-7xl py-6 px-6 mx-auto">
-			<!-- Barcode Input Section -->
-			<BarcodeInput
-				v-if="!wsConnected || showInputManually"
-				ref="barcodeInputRef"
-				v-model="barcode"
-				@scan="onScan"
-			/>
+			<!-- Stock Taking View -->
+			<StockTakingView v-if="stockTakingMode" @exit="stockTakingMode = false" />
 
-			<!-- Current List Section (shown when there are items) -->
-			<!-- Style: List -->
-			<CurrentListTable
-				v-if="currentList.length > 0 && !cardsView"
-				:items="currentList"
-				:show-stock-qty="showStockQty"
-				@clear="clearCurrentList"
-				@remove="removeFromCurrent"
-				@open-weigh="openWeigh"
-				@open-details="openItemDetails"
-			/>
+			<!-- Normal label mode content -->
+			<template v-else>
+				<!-- Barcode Input Section -->
+				<BarcodeInput
+					v-if="!wsConnected || showInputManually"
+					ref="barcodeInputRef"
+					v-model="barcode"
+					@scan="onScan"
+				/>
 
-			<!-- Second style: Cards -->
-			<CurrentListCards
-				v-if="currentList.length > 0 && cardsView"
-				:items="currentList"
-				:show-stock-qty="showStockQty"
-				:show-dim-effect="showDimEffect"
-				@remove="removeFromCurrent"
-				@open-weigh="openWeigh"
-				@open-details="openItemDetails"
-			/>
+				<!-- Current List Section (shown when there are items) -->
+				<!-- Style: List -->
+				<CurrentListTable
+					v-if="currentList.length > 0 && !cardsView"
+					:items="currentList"
+					:show-stock-qty="showStockQty"
+					@clear="clearCurrentList"
+					@remove="removeFromCurrent"
+					@open-weigh="openWeigh"
+					@open-details="openItemDetails"
+				/>
 
-			<!-- Tabs Section (hidden when current list has items) -->
-			<div v-if="currentList.length === 0">
-				<Tabs
-					as="div"
-					class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
-					v-model="state.index"
-					:tabs="tabs"
-				>
-					<template #tab-panel="{ tab }">
-						<div class="p-6">
-							<!-- Recently Modified Tab -->
-							<RecentlyModifiedTab
-								v-if="tab.key === 'modified'"
-								:items="recentlyModified"
-								:show-stock-qty="showStockQty"
-								:loading="loadingModified"
-								@refresh="loadRecentlyModified(true)"
-								@add="addToCurrent"
-								@open-weigh="openWeigh"
-							/>
+				<!-- Second style: Cards -->
+				<CurrentListCards
+					v-if="currentList.length > 0 && cardsView"
+					:items="currentList"
+					:show-stock-qty="showStockQty"
+					:show-dim-effect="showDimEffect"
+					@remove="removeFromCurrent"
+					@open-weigh="openWeigh"
+					@open-details="openItemDetails"
+				/>
 
-							<!-- Recently Scanned Tab -->
-							<RecentlyScannedTab
-								v-else
-								:items="recentlyScanned"
-								:show-stock-qty="showStockQty"
-								@clear="recentlyScanned = []"
-								@add="addToCurrent"
-								@open-weigh="openWeigh"
-							/>
-						</div>
-					</template>
-				</Tabs>
-			</div>
+				<!-- Tabs Section (hidden when current list has items) -->
+				<div v-if="currentList.length === 0">
+					<Tabs
+						as="div"
+						class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
+						v-model="state.index"
+						:tabs="tabs"
+					>
+						<template #tab-panel="{ tab }">
+							<div class="p-6">
+								<!-- Recently Modified Tab -->
+								<RecentlyModifiedTab
+									v-if="tab.key === 'modified'"
+									:items="recentlyModified"
+									:show-stock-qty="showStockQty"
+									:loading="loadingModified"
+									@refresh="loadRecentlyModified(true)"
+									@add="addToCurrent"
+									@open-weigh="openWeigh"
+								/>
+
+								<!-- Recently Scanned Tab -->
+								<RecentlyScannedTab
+									v-else
+									:items="recentlyScanned"
+									:show-stock-qty="showStockQty"
+									@clear="recentlyScanned = []"
+									@add="addToCurrent"
+									@open-weigh="openWeigh"
+								/>
+							</div>
+						</template>
+					</Tabs>
+				</div>
+			</template>
 		</div>
 
 		<!-- Weight Modal -->
@@ -121,6 +128,7 @@ import RecentlyModifiedTab from "./components/RecentlyModifiedTab.vue";
 import RecentlyScannedTab from "./components/RecentlyScannedTab.vue";
 import WeightLabelModal from "./components/WeightLabelModal.vue";
 import ItemDetailsModal from "./components/ItemDetailsModal.vue";
+import StockTakingView from "./components/StockTakingView.vue";
 import { useI18n } from "vue-i18n";
 
 export default {
@@ -136,6 +144,7 @@ export default {
 		RecentlyScannedTab,
 		WeightLabelModal,
 		ItemDetailsModal,
+		StockTakingView,
 	},
 	setup() {
 		const { t } = useI18n();
@@ -180,6 +189,7 @@ export default {
 		const printing = ref(false);
 		const cardsView = ref(true);
 		const showInputManually = ref(false);
+		const stockTakingMode = ref(false);
 		const weightModalOpen = ref(false);
 		const weightModalItem = ref(null);
 		const itemDetailsModalOpen = ref(false);
@@ -625,6 +635,7 @@ export default {
 			printing,
 			cardsView,
 			showInputManually,
+			stockTakingMode,
 			weightModalOpen,
 			weightModalItem,
 			showDimEffect,

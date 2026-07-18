@@ -11,7 +11,7 @@
 							ref="inputRef"
 							:value="modelValue"
 							@input="$emit('update:modelValue', $event.target.value)"
-							:placeholder="$t('Scan or enter barcode manually')"
+							:placeholder="placeholder || $t('Scan or enter barcode manually')"
 							@keydown.enter="$emit('scan')"
 							type="text"
 							autocomplete="off"
@@ -41,6 +41,10 @@ export default {
 	components: { Button },
 	props: {
 		modelValue: String,
+		placeholder: {
+			type: String,
+			default: null,
+		},
 	},
 	emits: ["update:modelValue", "scan"],
 	setup() {
