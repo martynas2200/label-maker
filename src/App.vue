@@ -121,6 +121,8 @@ import { getTTSService } from "./api/tts";
 import { LabelGenerator } from "./helpers/labelGenerator";
 import { toast } from "./helpers/toast";
 import AppHeader from "./components/AppHeader.vue";
+import { calculateTotalPrice } from "./helpers/utilities";
+import { parseBarcode } from "./helpers/barcodeParser";
 import BarcodeInput from "./components/BarcodeInput.vue";
 import CurrentListTable from "./components/CurrentListTable.vue";
 import CurrentListCards from "./components/CurrentListCards.vue";
@@ -217,47 +219,6 @@ export default {
 		});
 
 		/**
-		 * Check if barcode can be a packaged item
-		 */
-		function canItBePackaged(barcode) {
-			const prefix = parseInt(barcode.slice(0, 2), 10);
-			return (barcode.length === 13 || barcode.length === 21) && prefix > 20 && prefix < 30;
-		}
-
-		/**
-		 * Extract the item code part from a packaged barcode
-		 */
-		function extractBarcodePart(barcode) {
-			if (barcode.length === 13 && ["23", "24"].includes(barcode.slice(0, 2))) {
-				return barcode.slice(0, 8);
-			} else if (barcode.length === 13 && ["25", "29"].includes(barcode.slice(0, 2))) {
-				return barcode.slice(0, 7);
-			} else if (barcode.length === 21) {
-				return barcode.slice(4, 17).replace(/^0+/, "");
-			}
-			return barcode;
-		}
-
-		/**
-		 * Calculate weight from packaged barcode
-		 */
-		function calculateWeight(barcode) {
-			const weightPart = barcode.length > 13 ? barcode.slice(17, 21) : barcode.slice(8, 12);
-			return parseInt(weightPart, 10) / 1000;
-		}
-
-		/**
-		 * Calculate total price for packaged item
-		 */
-		function calculateTotalPrice(pricePerUnit, quantity) {
-			if (pricePerUnit == null || quantity == null) {
-				return 0;
-			}
-			const totalPrice = pricePerUnit * quantity;
-			return Math.round((totalPrice + Number.EPSILON) * 100) / 100;
-		}
-
-		/**
 		 * Trigger dim effect for other items
 		 */
 		function triggerDimEffect() {
@@ -297,14 +258,14 @@ export default {
 				let isPackaged = false;
 				let packagedWeight = 0;
 
-				// Check if this could be a packaged item barcode
-				if (canItBePackaged(code)) {
-					const barcodePart = extractBarcodePart(code);
-					item = await itemService.getItem(barcodePart);
+				// Parse barcode — handles packaged (variable-weight) barcodes
+				const parsed = parseBarcode(code);
+				if (parsed?.isPackaged) {
+					item = await itemService.getItem(parsed.itemCode);
 
 					if (item) {
 						isPackaged = true;
-						packagedWeight = calculateWeight(code);
+						packagedWeight = parsed.weight;
 
 						// Add weight and total price to the item
 						item.weight = packagedWeight;
