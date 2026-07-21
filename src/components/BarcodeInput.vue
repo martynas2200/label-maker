@@ -12,7 +12,7 @@
 							:value="modelValue"
 							@input="$emit('update:modelValue', $event.target.value)"
 							:placeholder="placeholder || $t('Scan or enter barcode manually')"
-							@keydown.enter="$emit('scan')"
+							@keyup.enter="$emit('scan')"
 							type="text"
 							autocomplete="off"
 							class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

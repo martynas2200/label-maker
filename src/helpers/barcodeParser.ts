@@ -10,7 +10,7 @@
 export interface ParsedBarcode {
   isPackaged: boolean;
   itemCode: string;
-   weight: number; // in kg (0 for non-packaged barcodes)
+  weight: number; // in kg (0 for non-packaged barcodes)
 }
 
 export function canBePackagedBarcode(barcode: string): boolean {

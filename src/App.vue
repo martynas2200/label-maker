@@ -113,6 +113,7 @@
 <script>
 import { Button, Tabs } from "frappe-ui";
 import { onMounted, onUnmounted, ref, computed, watch, nextTick, reactive } from "vue";
+import { useScannerEvents } from "./composables/useScannerEvents";
 import { getItemService } from "./api/items";
 import { getWebSocketService } from "./api/websocket";
 import { getLabelService } from "./api/labels";
@@ -120,9 +121,8 @@ import { getSettingsService } from "./api/settings";
 import { getTTSService } from "./api/tts";
 import { LabelGenerator } from "./helpers/labelGenerator";
 import { toast } from "./helpers/toast";
+import { scanBarcode } from "./services/scanner";
 import AppHeader from "./components/AppHeader.vue";
-import { calculateTotalPrice } from "./helpers/utilities";
-import { parseBarcode } from "./helpers/barcodeParser";
 import BarcodeInput from "./components/BarcodeInput.vue";
 import CurrentListTable from "./components/CurrentListTable.vue";
 import CurrentListCards from "./components/CurrentListCards.vue";
@@ -183,8 +183,8 @@ export default {
 			localStorage.getItem("recentlyScanned")
 				? JSON.parse(localStorage.getItem("recentlyScanned"))
 				: []
-		); // Load from localStorage
-		const recentlyModified = ref([]); // Recently modified items from backend
+		);
+		const recentlyModified = ref([]);
 		const loadingModified = ref(false);
 		const barcode = ref("");
 		const barcodeInputRef = ref(null);
@@ -200,11 +200,13 @@ export default {
 		let dimTimer = null;
 		let autoRefreshTimer = null;
 
-		// WebSocket event handlers
-		const handleBarcode = (code) => {
-			barcode.value = code;
-			onScan();
-		};
+		useScannerEvents(
+			computed(() => !stockTakingMode),
+			(code) => {
+				barcode.value = code;
+				onScan();
+			}
+		);
 
 		const wsConnected = computed(() => websocket.state.connected);
 		const showReconnectButton = computed(() => {
@@ -218,19 +220,13 @@ export default {
 			return currentList.value.length === 0 && state.index === 0;
 		});
 
-		/**
-		 * Trigger dim effect for other items
-		 */
 		function triggerDimEffect() {
-			// Clear existing timer
 			if (dimTimer) {
 				clearTimeout(dimTimer);
 			}
 
-			// Show dim effect
 			showDimEffect.value = true;
 
-			// Remove dim effect after 10 seconds
 			dimTimer = setTimeout(() => {
 				showDimEffect.value = false;
 			}, 10000);
@@ -246,39 +242,13 @@ export default {
 			}
 		}
 
-		/**
-		 * Handle barcode scan
-		 */
 		async function onScan() {
 			const code = (barcode.value || "").trim();
 			if (!code) return;
 
 			try {
-				let item;
-				let isPackaged = false;
-				let packagedWeight = 0;
-
-				// Parse barcode — handles packaged (variable-weight) barcodes
-				const parsed = parseBarcode(code);
-				if (parsed?.isPackaged) {
-					item = await itemService.getItem(parsed.itemCode);
-
-					if (item) {
-						isPackaged = true;
-						packagedWeight = parsed.weight;
-
-						// Add weight and total price to the item
-						item.weight = packagedWeight;
-						item.total_price = calculateTotalPrice(item.standard_rate, packagedWeight);
-					}
-				}
-
-				// If not packaged or not found as packaged, try normal lookup
-				if (!item) {
-					item = await itemService.getItem(code);
-				}
-
-				if (!item) {
+				const result = await scanBarcode(code);
+				if (!result) {
 					toast({
 						title: "Item not found",
 						text: `Barcode: ${code}`,
@@ -289,6 +259,8 @@ export default {
 					focusInput();
 					return;
 				}
+
+				const { item, isPackaged, packagedWeight } = result;
 
 				// Add to current list (remove duplicates, keep order)
 				currentList.value = [
@@ -319,7 +291,6 @@ export default {
 					}
 				}
 
-				// Show success with additional info for packaged items
 				const message = isPackaged
 					? `Packaged item added: ${item.item_code} - ${
 							item.item_name
@@ -343,9 +314,6 @@ export default {
 			}
 		}
 
-		/**
-		 * Load recently modified items
-		 */
 		async function loadRecentlyModified(forced = false) {
 			loadingModified.value = true;
 			try {
@@ -373,9 +341,6 @@ export default {
 			}
 		}
 
-		/**
-		 * Start auto-refresh for recently modified items
-		 */
 		function startAutoRefresh() {
 			if (autoRefreshTimer) return; // Already running
 
@@ -386,9 +351,6 @@ export default {
 			}, 60000); // Every 60 seconds (1 minute)
 		}
 
-		/**
-		 * Stop auto-refresh
-		 */
 		function stopAutoRefresh() {
 			if (autoRefreshTimer) {
 				clearInterval(autoRefreshTimer);
@@ -396,9 +358,6 @@ export default {
 			}
 		}
 
-		/**
-		 * Print labels for current items
-		 */
 		async function onPrint() {
 			if (currentList.value.length === 0) {
 				toast({
@@ -412,7 +371,6 @@ export default {
 
 			printing.value = true;
 			try {
-				// Load settings (fail-proof fallback to empty object)
 				const settings = await settingsSvc.get().catch(() => ({}));
 				const defaultLabelType = settings?.default_label_type || "normal";
 
@@ -444,9 +402,6 @@ export default {
 			}
 		}
 
-		/**
-		 * Add item to current list from history
-		 */
 		function addToCurrent(item) {
 			currentList.value = [
 				item,
@@ -464,16 +419,10 @@ export default {
 			});
 		}
 
-		/**
-		 * Remove item from current list
-		 */
 		function removeFromCurrent(itemCode) {
 			currentList.value = currentList.value.filter((i) => i.item_code !== itemCode);
 		}
 
-		/**
-		 * Clear current list and show tabs again
-		 */
 		function clearCurrentList() {
 			currentList.value = [];
 			toast({
@@ -491,17 +440,11 @@ export default {
 			weightModalOpen.value = true;
 		}
 
-		/**
-		 * Open item details modal
-		 */
 		function openItemDetails(item) {
 			itemDetailsModalItem.value = item;
 			itemDetailsModalOpen.value = true;
 		}
 
-		/**
-		 * Handle manual reconnect request
-		 */
 		function handleReconnect() {
 			toast({
 				title: "Reconnecting websocket...",
@@ -511,9 +454,6 @@ export default {
 			websocket.manualReconnect();
 		}
 
-		/**
-		 * Initialize on mount
-		 */
 		onMounted(async () => {
 			try {
 				const cfg = await settingsSvc.get();
@@ -521,8 +461,6 @@ export default {
 				// Connect websocket if configured
 				if (cfg?.ws_address) {
 					websocket.connect(cfg.ws_address);
-					// Listen to barcode events
-					websocket.emitter.on("barcode", handleBarcode);
 				} else {
 					// If no websocket, focus input for manual entry
 					showInputManually.value = true;
@@ -575,10 +513,7 @@ export default {
 			if (dimTimer) {
 				clearTimeout(dimTimer);
 			}
-			// Remove WebSocket listeners
-			websocket.emitter.off("barcode", handleBarcode);
 		});
-
 		return {
 			tabs,
 			state,

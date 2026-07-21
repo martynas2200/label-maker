@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "json": "{}",
+ "modified": "2026-07-21 14:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "Label Maker",
+ "name": "Stock Check Status",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "",
+ "ref_doctype": "Item",
+ "report_name": "Stock Check Status",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Label Maker User"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

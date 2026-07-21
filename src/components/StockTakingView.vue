@@ -89,6 +89,7 @@
 							:placeholder="systemQty?.toString()"
 							class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-semibold"
 							@keyup.enter="saveCheck"
+							@keyup.escape="dismissItem"
 							autofocus
 						/>
 					</div>
@@ -105,11 +106,67 @@
 					</Button>
 				</div>
 
-				<!-- Last check info -->
-				<p v-if="lastCheck" class="mt-3 text-sm text-gray-500">
-					{{ $t("Last checked at") }}{{ formatDate(lastCheck.checked_at) }},
-					{{ lastCheck.actual_qty }} {{ $t("counted by") }} {{ lastCheck.checked_by }}
-				</p>
+				<!-- Last check info + save with previous -->
+				<div
+					v-if="lastCheck && lastCheck.checked_at"
+					class="mt-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-500 flex flex-wrap items-center gap-x-3 gap-y-1"
+				>
+					<span class="inline-flex items-center gap-1">
+						<svg
+							class="w-3.5 h-3.5 text-gray-400"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+						{{ $t("Last check") }}:
+						<span class="font-medium text-gray-600">{{
+							formatDate(lastCheck.checked_at)
+						}}</span>
+					</span>
+					<span class="text-gray-300">|</span>
+					<span
+						>{{ $t("System") }}:
+						<span class="font-mono font-medium text-gray-600">{{
+							lastCheck.system_qty
+						}}</span></span
+					>
+					<span class="text-gray-300">|</span>
+					<span
+						>{{ $t("Counted") }}:
+						<span class="font-mono font-medium text-gray-600">{{
+							lastCheck.actual_qty
+						}}</span></span
+					>
+					<span class="text-gray-300">|</span>
+					<span>
+						{{ $t("Diff") }}:
+						<span
+							class="font-mono font-semibold"
+							:class="
+								lastCheck.difference === 0
+									? 'text-green-600'
+									: lastCheck.difference > 0
+									? 'text-green-600'
+									: 'text-red-600'
+							"
+						>
+							{{ lastCheck.difference > 0 ? "+" : "" }}{{ lastCheck.difference }}
+						</span>
+					</span>
+					<button
+						@click="saveWithPrevious"
+						class="ml-auto text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline whitespace-nowrap"
+					>
+						{{ $t("Save with previous") }}
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -203,9 +260,10 @@
 <script>
 import { ref, computed, nextTick } from "vue";
 import { Button, FeatherIcon } from "frappe-ui";
-import { getItemService } from "../api/items";
+import { useScannerEvents } from "../composables/useScannerEvents";
 import { getStockTakeService } from "../api/stocktake";
 import { getTTSService } from "../api/tts";
+import { scanBarcode } from "../services/scanner";
 import { toast } from "../helpers/toast";
 import BarcodeInput from "./BarcodeInput.vue";
 
@@ -214,9 +272,13 @@ export default {
 	components: { Button, FeatherIcon, BarcodeInput },
 	emits: ["exit"],
 	setup(props, { emit }) {
-		const itemService = getItemService();
 		const stockTakeService = getStockTakeService();
 		const tts = getTTSService();
+
+		useScannerEvents(ref(true), (code) => {
+			barcode.value = code;
+			onScan();
+		});
 
 		const barcode = ref("");
 		const barcodeInputRef = ref(null);
@@ -253,8 +315,8 @@ export default {
 			if (!code) return;
 
 			try {
-				const item = await itemService.getItem(code);
-				if (!item) {
+				const result = await scanBarcode(code);
+				if (!result) {
 					toast({
 						title: "Item not found",
 						text: `Barcode: ${code}`,
@@ -266,6 +328,8 @@ export default {
 					return;
 				}
 
+				const { item, packagedWeight } = result;
+
 				// Load last check info
 				let last = null;
 				try {
@@ -273,11 +337,10 @@ export default {
 				} catch (_) {
 					// Ignore errors fetching last check
 				}
-
 				currentItem.value = item;
 				systemQty.value = item.stock_qty ?? 0;
 				lastCheck.value = last;
-				actualQty.value = null;
+				actualQty.value = packagedWeight > 0 ? packagedWeight : null;
 				saved.value = false;
 
 				// Speak the system quantity
@@ -285,11 +348,6 @@ export default {
 				if (qty > 0) {
 					tts.speak(tts.numberToWords(qty));
 				}
-
-				// Focus the qty input after render
-				await nextTick();
-				const qtyInput = document.querySelector('input[type="number"]');
-				if (qtyInput) qtyInput.focus();
 			} catch (e) {
 				toast({
 					text: String(e?.message || e),
@@ -298,6 +356,9 @@ export default {
 				});
 			} finally {
 				barcode.value = "";
+				await nextTick();
+				const qtyInput = document.querySelector('input[type="number"]');
+				if (qtyInput) qtyInput.focus();
 			}
 		}
 
@@ -354,6 +415,22 @@ export default {
 			}
 		}
 
+		async function saveWithPrevious() {
+			if (!currentItem.value || !lastCheck.value) return;
+
+			const prevQty = lastCheck.value.actual_qty;
+			const currentEntry = Number(actualQty.value) || 0;
+			const newQty = prevQty + currentEntry;
+
+			const confirmed = window.confirm(
+				`Take the previous count (${prevQty}) and add the currently entered value (${currentEntry}), saving as ${newQty}?`
+			);
+			if (!confirmed) return;
+
+			actualQty.value = newQty;
+			await saveCheck();
+		}
+
 		function dismissItem() {
 			currentItem.value = null;
 			systemQty.value = null;
@@ -385,6 +462,7 @@ export default {
 			formatDate,
 			onScan,
 			saveCheck,
+			saveWithPrevious,
 			dismissItem,
 			focusInput,
 		};

@@ -84,7 +84,7 @@ def save_stock_check(
 		)
 		doc.insert(ignore_permissions=True)
 		# For receipt printer bridge
-		if difference != 0:
+		if difference != 0 and frappe.request.cookies.get("no-receipts") is None:
 			frappe.publish_realtime(event="stock_take", room="website", message=doc)
 		return doc.as_dict()
 	except Exception as e:
