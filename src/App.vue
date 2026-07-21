@@ -201,7 +201,7 @@ export default {
 		let autoRefreshTimer = null;
 
 		useScannerEvents(
-			computed(() => !stockTakingMode),
+			computed(() => !stockTakingMode.value),
 			(code) => {
 				barcode.value = code;
 				onScan();
