@@ -1,0 +1,287 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Invoice Helper\n"
+"POT-Creation-Date: 2026-07-21 00:00+0000\n"
+"PO-Revision-Date: 2026-07-21 00:00+0000\n"
+"Last-Translator: Auto-generated <>\n"
+"Language-Team: Lithuanian\n"
+"Language: lt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Label Maker"
+msgstr "Etiketės kūrėjas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:5:label
+msgid "Actual Qty"
+msgstr "Faktinis kiekis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/stocktake.py:48
+msgid "Actual quantity is required"
+msgstr "Reikalingas faktinis kiekis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:2:label
+msgid "Barcode"
+msgstr "Brūkšninis kodas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:15:description
+msgid "CSS injected into the print popup alongside the label dimensions. Scoped to .label { width: <width>mm; height: <height>mm; } by default."
+msgstr "CSS įterpiamas į spausdinimo iššokantį langą kartu su etiketės matmenimis. Pagal numatytuosius nustatymus jis yra susietas su .label { width: <width>mm; height: <height>mm; }."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:9:label
+msgid "Checked At"
+msgstr "Patikros laikas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:8:label
+msgid "Checked By"
+msgstr "Patikrino"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:6:label
+msgid "Columns"
+msgstr "Stulpeliai"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/report/stock_check_status/stock_check_status.py:47
+msgid "Counted"
+msgstr "Ar skaičiuota"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:15:label
+msgid "Custom CSS"
+msgstr "Pasirinktinis CSS"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/report/stock_check_status/stock_check_status.js:14
+msgid "Days Back"
+msgstr "Dienos atgal"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:1:label
+msgid "Default Label Type"
+msgstr "Numatytoji etiketės rūšis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:10:label
+msgid "Default Warehouse"
+msgstr "Numatytasis sandėlis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:9:label
+msgid "Default Warehouse Group"
+msgstr "Numatyta sandėlių grupė"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/edits.py:27
+msgid "Default warehouse and warehouse group not configured in Label Maker Settings"
+msgstr "Numatytasis sandėlis ir sandėlių grupė nėra sukonfigūruoti etikečių kūrėjo nustatymuose"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/fixtures/custom_field.json:0:label
+msgid "Deposit Package Count"
+msgstr "Depozito pakuotės skaičius"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:1:label
+msgid "Description"
+msgstr "Aprašymas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:6:label
+msgid "Difference"
+msgstr "Skirtumas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:7:label
+msgid "Dimensions"
+msgstr "Matmenys"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:4:description
+msgid "Enable weight-entry workflow for this label type (e.g. deli / fresh items sold by weight)."
+msgstr "Įgalinti svorio įrašymo darbų eigą šiai etiketės rūšiai (pvz., deli / atvėsintos prekės, pardaviamos pagal svorį)."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/edits.py:49
+msgid "Failed to add reorder level: {0}"
+msgstr "Nepavyko pridėti užsakymo lygio: {0}"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/edits.py:70
+msgid "Failed to delete reorder level: {0}"
+msgstr "Nepavyko ištrinti užsakymo lygio: {0}"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/stocktake.py:92
+msgid "Failed to save stock check: {0}"
+msgstr "Nepavyko išsaugoti atsargų patikros: {0}"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:17:description
+msgid "Full ZPL command string with Jinja2 expressions. Example: ^XA^FO50,50^ADN,36,20^FD{{ item.item_name }}^FS^XZ"
+msgstr "Pilnas ZPL komandų eilutė su Jinja2 išraiškomis. Pavyzdys: ^XA^FO50,50^ADN,36,20^FD{{ item.item_name }}^FS^XZ"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:5:description
+msgid "Google Cloud Text-to-Speech API key. Used to announce prices aloud when an item is scanned. Leave blank to disable voice announcements."
+msgstr "Google Cloud teksto į kalbą API raktas. Naudojamas kainoms garsiai paskelbti, kai prekė nuskenuojama. Palikite tuščią, jei norite išjungti balso pranešimus."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:5:label
+msgid "Google TTS API Key"
+msgstr "Google TTS API raktas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:14:label
+msgid "HTML Body Template"
+msgstr "HTML kūno šablonas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:13:label
+msgid "HTML Template"
+msgstr "HTML šablonas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:2:label
+msgid "Hardware & Connectivity"
+msgstr "Įrenginiai ir jungtys"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:9:label
+msgid "Height (mm)"
+msgstr "Aukštis (mm)"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/report/stock_check_status/stock_check_status.js:20
+msgid "Include All Items With Stock"
+msgstr "Įtraukti visas prekes su atsargomis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:6:label
+msgid "Inventory"
+msgstr "Inventorius"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:0:label
+msgid "Item Code"
+msgstr "Prekės kodas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/report/stock_check_status/stock_check_status.js:8
+msgid "Item Group"
+msgstr "Prekės grupė"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:1:label
+msgid "Item Name"
+msgstr "Prekės pavadinimas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:7:description
+msgid "Item charged for single-use packaging bags on weighted labels (e.g. a plastic bag fee). When selected, the bag fee is added to the printed label total."
+msgstr "Prekė, už kurią mokama už vieną kartą naudojamų pakavimo maišelio (pvz., plastikinio maišelio mokestis). Pasirinkus, maišelio mokestis yra pridėtas prie spausdinto etiketės galutinio sumos."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/stocktake.py:45
+msgid "Item code is required"
+msgstr "Reikalingas prekės kodas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:14:description
+msgid "Jinja2 HTML fragment placed inside <div class=\"label\">. Use {{ item.item_name }}, {{ barcode }}, {{ price }}, etc."
+msgstr "Jinja2 HTML fragmentas, įdėtas į <div class=\"label\">. Naudokite {{ item.item_name }}, {{ barcode }}, {{ price }} ir kt."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:16:description
+msgid "Jinja2 ZPL template rendered server-side. Same context variables as the HTML template."
+msgstr "Jinja2 ZPL šablonas, pateiktas serverio pusėje. Tie patys konteksto kintamieji kaip HTML šablone."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:13:description
+msgid "Jinja2 template rendered server-side. Available context variables: item (all item fields), barcode (primary barcode string), price (formatted string), price_per_unit (string or null), label_type (this document)."
+msgstr "Jinja2 šablonas, pateiktas serverio pusėje. Galimi konteksto kintamieji: item (visi prekės laukai), barcode (pagrindinė brūkšninio kodo eilutė), price (suformatuota eilutė), price_per_unit (eilutė arba null), label_type (šis dokumentas)."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:0:label
+msgid "Label Name"
+msgstr "Etiketės pavadinimas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:1:description
+msgid "Label Type used when printing from the main list. Must be configured before printing."
+msgstr "Etiketės tipas, naudojamas spausdinant iš pagrindinio sąrašo. Prieš spausdinimą būtina sukonfigūruoti."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/page/labels/labels.json:title
+msgid "Labels"
+msgstr "Etiketės"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/report/stock_check_status/stock_check_status.py:53
+msgid "Last Checked At"
+msgstr "Paskutinį kartą patikrinta"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:12:label
+msgid "Margin Left (mm)"
+msgstr "Kairės paraštė (mm)"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:11:label
+msgid "Margin Top (mm)"
+msgstr "Viršutinė paraštė (mm)"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/utils/guard.py:12
+msgid "Not permitted"
+msgstr "Neleidžiama"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/fixtures/custom_field.json:0:description
+msgid "Number of items in a deposit package, e.g., 6 bottles in a pack"
+msgstr ""
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:6:description
+msgid "Number of label columns per printed sheet row."
+msgstr "Spausdinamo lapo eilutėje esančių etikečių stulpelių skaičius."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:7:label
+msgid "Packaging Bag Item"
+msgstr "Pakavimo maišelio prekė"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:3:label
+msgid "Print Format"
+msgstr "Spausdinimo formatas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:2:label
+msgid "Print Settings"
+msgstr "Spausdinimo nustatymai"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:10:description
+msgid "Specific warehouse used for stock level display in the item list."
+msgstr "Konkretaus sandėlio naudojimas atsargų lygio rodymui prekių sąraše."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/report/stock_check_status/stock_check_status.py:40
+msgid "Stock Qty"
+msgstr "Atsargų kiekis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:4:description
+msgid "Stock quantity at the time of check"
+msgstr "Atsargų kiekis patikros metu"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.py:28
+msgid "Syntax error in {0}: {1}"
+msgstr "Sintaksės klaida {0}: {1}"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:fields:4:label
+msgid "System Qty"
+msgstr "Sistemos kiekis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:4:label
+msgid "Text-to-Speech"
+msgstr "Tekstas į kalbą"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:3:description
+msgid "URL of the WebSocket server that relays barcode scanner and scale readings. Expected message format: <code>BARCODE:&lt;value&gt;</code> or <code>WEIGHT:&lt;grams&gt;</code>. Example: <code>ws://192.168.1.10:8765</code>"
+msgstr "Brūkšninių kodų skaitytuvo ir svarstyklių skaitymų perdavimo WebSocket serverio URL. Tikimasi, kad pranešimo formatas bus: <code>BARCODE:&lt;value&gt;</code> arba <code>WEIGHT:&lt;grams&gt;</code>. Pavyzdys: <code>ws://192.168.1.10:8765</code>"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:9:description
+msgid "Warehouse group used to filter stock level lookups."
+msgstr "Sandėlių grupė, naudojama atsargų lygio paieškai filtruoti."
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:fields:3:label
+msgid "WebSocket Address"
+msgstr "WebSocket adresas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:4:label
+msgid "Weighted"
+msgstr "Svorinis"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:8:label
+msgid "Width (mm)"
+msgstr "Plotis (mm)"
+
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/settings.py:97
+msgid "You do not have permission to update settings"
+msgstr "Neturite leidimo atnaujinti nustatymų"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/settings.py:139
+msgid "You must be logged in to access settings"
+msgstr "Norint pasiekti nustatymus, turite prisijungti"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/settings.py:165
+msgid "You must be logged in to update settings"
+msgstr "Norint atnaujinti nustatymus, turite prisijungti"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/api/stocktake.py:40
+msgid "You must have the role Label Maker User to perform stock checks"
+msgstr "Norint atlikti atsargų patikras, turite turėti etikečių kūrėjo vartotojo vaidmenį"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:16:label
+msgid "ZPL Template"
+msgstr "ZPL šablonas"
+
+#: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:3:description
+msgid "html: renders the HTML template in a browser print dialog. zpl: sends raw ZPL commands to a label printer."
+msgstr "html: pateikia HTML šabloną naršyklės spausdinimo dialoge. zpl: siunčia raw ZPL komandas į etikečių spausdintuvą."

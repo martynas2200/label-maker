@@ -21,10 +21,41 @@
       "fieldtype": "Small Text"
     },
     {
-      "fieldname": "template",
-      "label": "Template",
-      "fieldtype": "Code",
-      "options": "HTML"
+      "fieldname": "print_settings_section",
+      "label": "Print Settings",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "print_format",
+      "label": "Print Format",
+      "fieldtype": "Select",
+      "options": "html\nzpl",
+      "default": "html",
+      "reqd": 1,
+      "description": "html: renders the HTML template in a browser print dialog. zpl: sends raw ZPL commands to a label printer."
+    },
+    {
+      "fieldname": "weighted",
+      "label": "Weighted",
+      "fieldtype": "Check",
+      "default": 0,
+      "description": "Enable weight-entry workflow for this label type (e.g. deli / fresh items sold by weight)."
+    },
+    {
+      "fieldname": "col_break_print",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "columns",
+      "label": "Columns",
+      "fieldtype": "Int",
+      "default": 1,
+      "description": "Number of label columns per printed sheet row."
+    },
+    {
+      "fieldname": "dimensions_section",
+      "label": "Dimensions",
+      "fieldtype": "Section Break"
     },
     {
       "fieldname": "width",
@@ -39,6 +70,10 @@
       "default": 30
     },
     {
+      "fieldname": "col_break_dim",
+      "fieldtype": "Column Break"
+    },
+    {
       "fieldname": "margin_top",
       "label": "Margin Top (mm)",
       "fieldtype": "Float",
@@ -51,16 +86,42 @@
       "default": 5
     },
     {
-      "fieldname": "columns",
-      "label": "Columns",
-      "fieldtype": "Int",
-      "default": 1
+      "fieldname": "html_template_section",
+      "label": "HTML Template",
+      "fieldtype": "Section Break",
+      "depends_on": "eval:doc.print_format === 'html'",
+      "description": "Jinja2 template rendered server-side. Available context variables: item (all item fields), barcode (primary barcode string), price (formatted string), price_per_unit (string or null), label_type (this document)."
     },
     {
-      "fieldname": "weighted",
-      "label": "Weighted",
-      "fieldtype": "Check",
-      "default": 0
+      "fieldname": "template",
+      "label": "HTML Body Template",
+      "fieldtype": "Code",
+      "options": "HTML",
+      "depends_on": "eval:doc.print_format === 'html'",
+      "description": "Jinja2 HTML fragment placed inside <div class=\"label\">. Use {{ item.item_name }}, {{ barcode }}, {{ price }}, etc."
+    },
+    {
+      "fieldname": "css",
+      "label": "Custom CSS",
+      "fieldtype": "Code",
+      "options": "CSS",
+      "depends_on": "eval:doc.print_format === 'html'",
+      "description": "CSS injected into the print popup alongside the label dimensions. Scoped to .label { width: <width>mm; height: <height>mm; } by default."
+    },
+    {
+      "fieldname": "zpl_template_section",
+      "label": "ZPL Template",
+      "fieldtype": "Section Break",
+      "depends_on": "eval:doc.print_format === 'zpl'",
+      "description": "Jinja2 ZPL template rendered server-side. Same context variables as the HTML template."
+    },
+    {
+      "fieldname": "zpl_template",
+      "label": "ZPL Template",
+      "fieldtype": "Code",
+      "options": "Jinja",
+      "depends_on": "eval:doc.print_format === 'zpl'",
+      "description": "Full ZPL command string with Jinja2 expressions. Example: ^XA^FO50,50^ADN,36,20^FD{{ item.item_name }}^FS^XZ"
     }
   ],
   "permissions": [
