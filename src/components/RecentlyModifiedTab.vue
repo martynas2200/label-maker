@@ -2,9 +2,8 @@
 	<div>
 		<div class="flex items-center justify-between mb-4">
 			<div class="flex items-center gap-2">
-				<i class="fa fa-history text-gray-500"></i>
 				<h2 class="text-lg font-semibold text-gray-900">
-					{{ $t("Recently Modified Items") }}
+					{{ $t("Recently Modified Item Prices") }}
 				</h2>
 				<span class="text-sm text-gray-500">({{ items.length }})</span>
 			</div>
@@ -18,7 +17,7 @@
 				<i class="fa fa-inbox"></i>
 			</div>
 			<p class="text-gray-500">
-				{{ $t("No recently modified items (based on their prices)") }}
+				{{ $t("No recently modified item prices") }}
 			</p>
 		</div>
 
