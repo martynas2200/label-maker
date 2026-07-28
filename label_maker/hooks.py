@@ -18,7 +18,10 @@ add_to_apps_screen = [
 	}
 ]
 
-fixtures = [{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_package_count"]]]}]
+fixtures = [
+	{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_package_count"]]]},
+	{"dt": "Custom DocPerm", "filters": [["parent", "=", "Item"], ["role", "=", "Label Maker User"]]},
+]
 
 # Includes in <head>
 # ------------------
@@ -197,8 +200,7 @@ fixtures = [{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_pac
 # ----------------
 before_request = ["label_maker.utils.guard.ensure_label_maker_access"]
 
-# Custom permission logic: allow users with role "Label Maker User" to read Item
-has_permission = {"Item": "label_maker.item.permission.has_permission"}
+
 # after_request = ["label_maker.utils.after_request"]
 
 # Job Events
