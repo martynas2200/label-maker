@@ -31,12 +31,15 @@ def get_item(code_or_barcode: str) -> dict[str, Any] | None:
 	"""
 
 	# Look up barcode first
-	item_code = _find_item_code_by_barcode(code_or_barcode)
-	if not item_code:
+	barcode_result = _find_item_code_and_uom_by_barcode(code_or_barcode)
+	if barcode_result:
+		item_code, uom = barcode_result
+	else:
 		# Fall back to using input as item code
 		item_code = code_or_barcode
+		uom = None
 
-	return _fetch_item_details(item_code)
+	return _fetch_item_details(item_code, uom)
 
 
 @frappe.whitelist()
@@ -132,31 +135,6 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 
 
 @frappe.whitelist()
-def get_item_by_barcode(barcode: str) -> dict[str, Any] | None:
-	"""
-	Retrieves an item specifically by barcode.
-
-	Normalizes the barcode and searches in Item Barcode table.
-	Includes pricing and stock information.
-
-	Args:
-		barcode: Barcode string to search for
-
-	Returns:
-		Item dictionary with details, or None if not found
-
-	Raises:
-		frappe.PermissionError: If user is not logged in
-	"""
-
-	item_code = _find_item_code_by_barcode(barcode)
-	if item_code:
-		return _fetch_item_details(item_code)
-
-	return None
-
-
-@frappe.whitelist()
 def get_stock_level(item_code: str) -> float | None:
 	"""
 	Retrieves the stock quantity for an item.
@@ -184,13 +162,16 @@ def get_stock_level(item_code: str) -> float | None:
 
 
 @frappe.whitelist()
-def get_item_selling_price(item_code: str, price_list: str | None = None) -> float | None:
+def get_item_selling_price(
+	item_code: str, price_list: str | None = None, uom: str | None = None
+) -> float | None:
 	"""
 	Retrieves the selling price for an item valid for today.
 
 	Args:
 		item_code: Item code to get price for
 		price_list: Optional specific price list to use. If not provided, fetches any selling price.
+		uom: Unit of measure for the item.
 
 	Returns:
 		Price amount, or None if not found
@@ -202,43 +183,34 @@ def get_item_selling_price(item_code: str, price_list: str | None = None) -> flo
 		return None
 
 	try:
-		# Fetch from Item Price table with date validity check
 		today = frappe.utils.today()
 
-		# Build SQL query based on whether price_list is provided
-		if price_list:
-			item_price = frappe.db.sql(
-				"""
-				SELECT price_list_rate
-				FROM `tabItem Price`
-				WHERE item_code = %(item_code)s
-					AND price_list = %(price_list)s
-					AND selling = 1
-					AND (valid_from IS NULL OR valid_from <= %(today)s)
-					AND (valid_upto IS NULL OR valid_upto >= %(today)s)
-				ORDER BY valid_from DESC
-				LIMIT 1
-			""",
-				{"item_code": item_code, "price_list": price_list, "today": today},
-				as_dict=False,
-			)
-		else:
-			item_price = frappe.db.sql(
-				"""
-				SELECT price_list_rate
-				FROM `tabItem Price`
-				WHERE item_code = %(item_code)s
-					AND selling = 1
-					AND (valid_from IS NULL OR valid_from <= %(today)s)
-					AND (valid_upto IS NULL OR valid_upto >= %(today)s)
-				ORDER BY valid_from DESC
-				LIMIT 1
-			""",
-				{"item_code": item_code, "today": today},
-				as_dict=False,
-			)
+		conditions = ["item_code = %(item_code)s", "selling = 1"]
+		params: dict[str, Any] = {"item_code": item_code, "today": today}
 
-		if item_price and len(item_price) > 0:
+		if price_list:
+			conditions.append("price_list = %(price_list)s")
+			params["price_list"] = price_list
+
+		if uom:
+			conditions.append("uom = %(uom)s")
+			params["uom"] = uom
+
+		item_price = frappe.db.sql(
+			f"""
+			SELECT price_list_rate
+			FROM `tabItem Price`
+			WHERE {" AND ".join(conditions)}
+				AND (valid_from IS NULL OR valid_from <= %(today)s)
+				AND (valid_upto IS NULL OR valid_upto >= %(today)s)
+			ORDER BY valid_from DESC
+			LIMIT 1
+			""",
+			params,
+			as_dict=False,
+		)
+
+		if item_price:
 			return item_price[0][0]
 		return None
 	except Exception as e:
@@ -283,6 +255,7 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 				currency,
 				valid_from,
 				valid_upto,
+				uom,
 				modified,
 				selling,
 				buying,
@@ -323,20 +296,20 @@ def get_item_price_lists(item_code: str) -> dict[str, Any]:
 
 def _normalize_barcode(barcode: str) -> str:
 	"""
-	Normalizes a barcode string by trimming and removing leading zeros.
+	Normalises a barcode string by trimming and removing leading zeros.
 	"""
 	if not barcode:
 		return ""
 	return barcode.strip().lstrip("0") or barcode.strip()
 
 
-def _find_item_code_by_barcode(barcode: str) -> list[str] | None:
+def _find_item_code_and_uom_by_barcode(barcode: str) -> tuple[str, str] | None:
 	"""
 	Finds an item code by searching for a normalized barcode.
-	Uses LIKE operator to match barcodes starting with the search string.
+	Uses LIKE operator to match barcodes whose trailing digits match the search string.
 
 	Returns:
-		Item code if found, None otherwise
+		Tuple of (item_code, uom) if found, None otherwise
 	"""
 	normalized_barcode = _normalize_barcode(barcode)
 	if not normalized_barcode:
@@ -344,27 +317,34 @@ def _find_item_code_by_barcode(barcode: str) -> list[str] | None:
 
 	try:
 		# Try original barcode as it is first
-		result = frappe.get_value("Item Barcode", filters={"barcode": barcode}, fieldname="parent")
+		result = frappe.db.get_value(
+			"Item Barcode",
+			filters={"barcode": barcode},
+			fieldname=["parent", "uom"],
+		)
 		if result:
-			return result
-		else:
-			result = frappe.db.sql(
-				"""
-			SELECT parent
+			return result[0], result[1]
+
+		# Fall back to LIKE search with normalized barcode
+		result = frappe.db.sql(
+			"""
+			SELECT parent, uom
 			FROM `tabItem Barcode`
 			WHERE barcode LIKE %(barcode)s
 			LIMIT 1
-		""",
-				{"barcode": f"%{normalized_barcode}"},
-				as_dict=False,
-			)
-			return result[0][0] if len(result) > 0 else None
+			""",
+			{"barcode": f"%{normalized_barcode}"},
+			as_dict=False,
+		)
+		if len(result) > 0:
+			return result[0][0], result[0][1]
+		return None
 	except Exception as e:
 		frappe.log_error(f"Error finding item code by barcode {normalized_barcode}: {e!s}")
 		return None
 
 
-def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
+def _fetch_item_details(item_code: str, uom: str | None) -> dict[str, Any] | None:
 	"""
 	Fetches complete item details including barcodes, pricing, and stock in one request.
 
@@ -373,6 +353,7 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 
 	Args:
 		item_code: Item code to fetch
+		uom: Unit of measure for the item
 
 	Returns:
 		dictionary with complete item details, or None if not found
@@ -395,9 +376,9 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 		except Exception:
 			stock_qty = 0
 
-		# Fetch item price
+		# Fetch item price, usually for the stock UOM if no barcode UOM is provided.
 		try:
-			standard_rate = get_item_selling_price(item_code)
+			standard_rate = get_item_selling_price(item_code, uom=uom if uom else item.stock_uom)
 		except Exception as e:
 			frappe.log_error(f"Error fetching item price for {item_code}: {e!s}")
 			standard_rate = "ERROR"
@@ -414,6 +395,7 @@ def _fetch_item_details(item_code: str) -> dict[str, Any] | None:
 			comments = []
 
 		# Build response
+		# TODO: Handler and Service logic concerns are mixed here
 		return {
 			"item_code": item.name,
 			"item_name": item.item_name,
