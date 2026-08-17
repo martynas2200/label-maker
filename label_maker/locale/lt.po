@@ -70,8 +70,8 @@ msgid "Default warehouse and warehouse group not configured in Label Maker Setti
 msgstr "Numatytasis sandėlis ir sandėlių grupė nėra sukonfigūruoti etikečių kūrėjo nustatymuose"
 
 #: /Users/martin/frappe-bench/apps/label_maker/label_maker/fixtures/custom_field.json:0:label
-msgid "Deposit Package Count"
-msgstr "Depozito pakuotės skaičius"
+msgid "Deposit Items per Stock UOM"
+msgstr "Užstato vienetų skaičius atsargų vienete"
 
 #: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:1:label
 msgid "Description"
@@ -198,8 +198,8 @@ msgid "Not permitted"
 msgstr "Neleidžiama"
 
 #: /Users/martin/frappe-bench/apps/label_maker/label_maker/fixtures/custom_field.json:0:description
-msgid "Number of items in a deposit package, e.g., 6 bottles in a pack"
-msgstr ""
+msgid "Number of deposit-bearing items (e.g., bottles or cans) in one stock UOM of this item, e.g., 6 for a pack of 6 bottles."
+msgstr "Užstato vienetų (pvz., butelių ar skardinių) skaičius viename šios prekės atsargų matavimo vienete, pvz., 6 – pakuotėje su 6 buteliais."
 
 #: /Users/martin/frappe-bench/apps/label_maker/label_maker/label_maker/doctype/label_type/label_type.json:fields:6:description
 msgid "Number of label columns per printed sheet row."

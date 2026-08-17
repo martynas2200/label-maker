@@ -1,8 +1,5 @@
 """
-Item API endpoints for Label Maker application.
-
-Provides comprehensive item information including pricing, stock levels, and barcodes.
-Permissions are based on user authentication and standard Frappe document permissions.
+Item API endpoints
 """
 
 from datetime import datetime
@@ -344,7 +341,7 @@ def _find_item_code_and_uom_by_barcode(barcode: str) -> tuple[str, str] | None:
 		return None
 
 
-def _fetch_item_details(item_code: str, uom: str | None) -> dict[str, Any] | None:
+def _fetch_item_details(item_code: str, uom: str | None = None) -> dict[str, Any] | None:
 	"""
 	Fetches complete item details including barcodes, pricing, and stock in one request.
 

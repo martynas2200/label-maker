@@ -1,8 +1,5 @@
 """
-Settings API endpoints for Label Maker application.
-
-Manages Label Maker Settings configuration with proper permission handling
-and caching support.
+Settings API endpoints
 """
 
 from typing import Any

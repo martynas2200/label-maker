@@ -4,7 +4,7 @@ Stock Take API endpoints for Label Maker.
 Provides endpoints to save stock check records and retrieve last check info.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import frappe
@@ -107,9 +107,13 @@ def get_last_check(item_code: str) -> dict[str, Any] | None:
 		return None
 
 	try:
+		cutoff = datetime.now() - timedelta(days=14)  # TODO: Could be a part of settings
 		checks = frappe.get_all(
 			"Stock Check Log",
-			filters={"item_code": item_code},
+			filters={
+				"item_code": item_code,
+				"checked_at": (">", cutoff),
+			},
 			fields=["*"],
 			order_by="checked_at desc",
 			limit_page_length=1,
