@@ -29,7 +29,7 @@
 					v-if="!wsConnected || showInputManually"
 					ref="barcodeInputRef"
 					v-model="barcode"
-					@scan="onScan"
+					@scan="handleScan"
 				/>
 
 				<!-- Current List Section (shown when there are items) -->
@@ -81,7 +81,7 @@
 									v-else
 									:items="recentlyScanned"
 									:show-stock-qty="showStockQty"
-									@clear="recentlyScanned = []"
+									@clear="clearRecentlyScanned"
 									@add="addToCurrent"
 									@open-weigh="openWeigh"
 								/>
@@ -112,8 +112,8 @@
 
 <script>
 import { Button, Tabs } from "frappe-ui";
-import { onMounted, onUnmounted, ref, computed, watch, nextTick, reactive } from "vue";
-import { useScannerEvents } from "./composables/useScannerEvents";
+import { onMounted, onUnmounted, ref, computed, watch, reactive } from "vue";
+import { useBarcodeScanner } from "./composables/useBarcodeScanner";
 import { getItemService } from "./api/items";
 import { getWebSocketService } from "./api/websocket";
 import { getLabelService } from "./api/labels";
@@ -121,7 +121,6 @@ import { getSettingsService } from "./api/settings";
 import { getTTSService } from "./api/tts";
 import { LabelGenerator } from "./helpers/labelGenerator";
 import { toast } from "./helpers/toast";
-import { scanBarcode } from "./services/scanner";
 import AppHeader from "./components/AppHeader.vue";
 import BarcodeInput from "./components/BarcodeInput.vue";
 import CurrentListTable from "./components/CurrentListTable.vue";
@@ -161,8 +160,7 @@ export default {
 			{ label: t("Recently Scanned"), key: "scanned" },
 		];
 
-		// State
-		const state = reactive({ index: 0 }); // Start with scanned tab
+		const state = reactive({ index: 0 });
 		const showStockQty = ref(
 			localStorage.getItem("showStockQty") !== null
 				? localStorage.getItem("showStockQty") === "true"
@@ -186,8 +184,6 @@ export default {
 		);
 		const recentlyModified = ref([]);
 		const loadingModified = ref(false);
-		const barcode = ref("");
-		const barcodeInputRef = ref(null);
 		const printing = ref(false);
 		const cardsView = ref(true);
 		const showInputManually = ref(false);
@@ -200,68 +196,9 @@ export default {
 		let dimTimer = null;
 		let autoRefreshTimer = null;
 
-		useScannerEvents(
-			computed(() => !stockTakingMode.value),
-			(code) => {
-				barcode.value = code;
-				onScan();
-			}
-		);
-
-		const wsConnected = computed(() => websocket.state.connected);
-		const showReconnectButton = computed(() => {
-			return (
-				!websocket.state.connected &&
-				websocket.state.reconnectAttempts >= websocket.state.maxReconnectAttempts &&
-				websocket.state.url !== ""
-			);
-		});
-		const isModifiedTabVisible = computed(() => {
-			return currentList.value.length === 0 && state.index === 0;
-		});
-
-		function triggerDimEffect() {
-			if (dimTimer) {
-				clearTimeout(dimTimer);
-			}
-
-			showDimEffect.value = true;
-
-			dimTimer = setTimeout(() => {
-				showDimEffect.value = false;
-			}, 10000);
-		}
-
-		/**
-		 * Focus on the barcode input
-		 */
-		async function focusInput() {
-			await nextTick();
-			if (barcodeInputRef.value) {
-				barcodeInputRef.value.focus();
-			}
-		}
-
-		async function onScan() {
-			const code = (barcode.value || "").trim();
-			if (!code) return;
-
-			try {
-				const result = await scanBarcode(code);
-				if (!result) {
-					toast({
-						title: "Item not found",
-						text: `Barcode: ${code}`,
-						icon: "alert",
-						variant: "warning",
-					});
-					barcode.value = "";
-					focusInput();
-					return;
-				}
-
-				const { item, isPackaged, packagedWeight } = result;
-
+		const { barcode, barcodeInputRef, focusInput, handleScan } = useBarcodeScanner({
+			active: computed(() => !stockTakingMode.value),
+			onItem: ({ item, isPackaged, packagedWeight }) => {
 				// Add to current list (remove duplicates, keep order)
 				currentList.value = [
 					item,
@@ -302,16 +239,31 @@ export default {
 					icon: "check",
 					timeout: 2,
 				});
-			} catch (e) {
-				toast({
-					text: String(e?.message || e),
-					icon: "x",
-					variant: "warning",
-				});
-			} finally {
-				barcode.value = "";
-				focusInput();
+			},
+		});
+
+		const wsConnected = computed(() => websocket.state.connected);
+		const showReconnectButton = computed(() => {
+			return (
+				!websocket.state.connected &&
+				websocket.state.reconnectAttempts >= websocket.state.maxReconnectAttempts &&
+				websocket.state.url !== ""
+			);
+		});
+		const isModifiedTabVisible = computed(() => {
+			return currentList.value.length === 0 && state.index === 0;
+		});
+
+		function triggerDimEffect() {
+			if (dimTimer) {
+				clearTimeout(dimTimer);
 			}
+
+			showDimEffect.value = true;
+
+			dimTimer = setTimeout(() => {
+				showDimEffect.value = false;
+			}, 10000);
 		}
 
 		async function loadRecentlyModified(forced = false) {
@@ -379,12 +331,12 @@ export default {
 				// await labels.printLabels(codes, defaultLabelType)
 
 				// Option 2: Use frontend LabelGenerator directly (old class, but faster, no backend call)
-				new LabelGenerator(currentList.value, defaultLabelType, settings);
-
-				toast({
-					title: `Printing ${currentList.value.length} labels`,
-					text: `Label type: ${defaultLabelType}`,
-					icon: "check",
+				new LabelGenerator(currentList.value, defaultLabelType, settings).then(() => {
+					toast({
+						title: `Printing ${currentList.value.length} labels`,
+						text: `Label type: ${defaultLabelType}`,
+						icon: "check",
+					});
 				});
 
 				// Move items to history and clear current list
@@ -430,6 +382,11 @@ export default {
 				icon: "check",
 				timeout: 5,
 			});
+		}
+
+		function clearRecentlyScanned() {
+			recentlyScanned.value = [];
+			localStorage.removeItem("recentlyScanned");
 		}
 
 		/**
@@ -499,7 +456,7 @@ export default {
 			}
 		});
 
-		// Watch for tab visibility changes to control auto-refresh
+		// TODO: Fix this, only subscribe when it is visible instead of forever
 		watch(isModifiedTabVisible, (visible) => {
 			if (visible) {
 				// Tab became visible, ensure auto-refresh is running
@@ -535,12 +492,13 @@ export default {
 			weightModalOpen,
 			weightModalItem,
 			showDimEffect,
-			onScan,
+			handleScan,
 			onPrint,
 			loadRecentlyModified,
 			addToCurrent,
 			removeFromCurrent,
 			clearCurrentList,
+			clearRecentlyScanned,
 			openWeigh,
 			openItemDetails,
 			handleReconnect,

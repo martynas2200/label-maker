@@ -3,7 +3,7 @@
 		<BarcodeInput
 			ref="barcodeInputRef"
 			v-model="barcode"
-			@scan="onScan"
+			@scan="handleScan"
 			:placeholder="$t('Scan item barcode to start counting...')"
 		/>
 
@@ -260,10 +260,9 @@
 <script>
 import { ref, computed, nextTick } from "vue";
 import { Button, FeatherIcon } from "frappe-ui";
-import { useScannerEvents } from "../composables/useScannerEvents";
+import { useBarcodeScanner } from "../composables/useBarcodeScanner";
 import { getStockTakeService } from "../api/stocktake";
 import { getTTSService } from "../api/tts";
-import { scanBarcode } from "../services/scanner";
 import { toast } from "../helpers/toast";
 import BarcodeInput from "./BarcodeInput.vue";
 
@@ -275,13 +274,6 @@ export default {
 		const stockTakeService = getStockTakeService();
 		const tts = getTTSService();
 
-		useScannerEvents(ref(true), (code) => {
-			barcode.value = code;
-			onScan();
-		});
-
-		const barcode = ref("");
-		const barcodeInputRef = ref(null);
 		const currentItem = ref(null);
 		const systemQty = ref(null);
 		const actualQty = ref(null);
@@ -289,6 +281,36 @@ export default {
 		const saving = ref(false);
 		const saved = ref(false);
 		const checkedItems = ref([]);
+
+		const { barcode, barcodeInputRef, focusInput, handleScan } = useBarcodeScanner({
+			active: ref(true),
+			onItem: async ({ item, packagedWeight }) => {
+				// Load last check info
+				let last = null;
+				try {
+					last = await stockTakeService.getLastCheck(item.item_code);
+				} catch (_) {
+					// Ignore errors fetching last check
+				}
+				currentItem.value = item;
+				systemQty.value = item.stock_qty ?? 0;
+				lastCheck.value = last;
+				actualQty.value = packagedWeight > 0 ? packagedWeight : null;
+				saved.value = false;
+
+				// Speak the system quantity
+				const qty = item.stock_qty ?? 0;
+				if (qty > 0) {
+					tts.speak(tts.numberToWords(qty));
+				}
+			},
+			// Focus the quantity input after a successful scan
+			focusAfterScan: async () => {
+				await nextTick();
+				const qtyInput = document.querySelector('input[type="number"]');
+				if (qtyInput) qtyInput.focus();
+			},
+		});
 
 		const difference = computed(() => {
 			if (systemQty.value === null || actualQty.value === null) return null;
@@ -308,58 +330,6 @@ export default {
 				hour: "2-digit",
 				minute: "2-digit",
 			});
-		}
-
-		async function onScan() {
-			const code = (barcode.value || "").trim();
-			if (!code) return;
-
-			try {
-				const result = await scanBarcode(code);
-				if (!result) {
-					toast({
-						title: "Item not found",
-						text: `Barcode: ${code}`,
-						icon: "alert",
-						variant: "warning",
-					});
-					barcode.value = "";
-					focusInput();
-					return;
-				}
-
-				const { item, packagedWeight } = result;
-
-				// Load last check info
-				let last = null;
-				try {
-					last = await stockTakeService.getLastCheck(item.item_code);
-				} catch (_) {
-					// Ignore errors fetching last check
-				}
-				currentItem.value = item;
-				systemQty.value = item.stock_qty ?? 0;
-				lastCheck.value = last;
-				actualQty.value = packagedWeight > 0 ? packagedWeight : null;
-				saved.value = false;
-
-				// Speak the system quantity
-				const qty = item.stock_qty ?? 0;
-				if (qty > 0) {
-					tts.speak(tts.numberToWords(qty));
-				}
-			} catch (e) {
-				toast({
-					text: String(e?.message || e),
-					icon: "x",
-					variant: "warning",
-				});
-			} finally {
-				barcode.value = "";
-				await nextTick();
-				const qtyInput = document.querySelector('input[type="number"]');
-				if (qtyInput) qtyInput.focus();
-			}
 		}
 
 		async function saveCheck() {
@@ -440,13 +410,6 @@ export default {
 			focusInput();
 		}
 
-		async function focusInput() {
-			await nextTick();
-			if (barcodeInputRef.value) {
-				barcodeInputRef.value.focus();
-			}
-		}
-
 		return {
 			barcode,
 			barcodeInputRef,
@@ -460,7 +423,7 @@ export default {
 			difference,
 			mismatchCount,
 			formatDate,
-			onScan,
+			handleScan,
 			saveCheck,
 			saveWithPrevious,
 			dismissItem,
