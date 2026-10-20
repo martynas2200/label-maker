@@ -85,7 +85,7 @@ def get_data(filters: dict[str, Any] | None = None) -> list[list]:
 	days_back = filters.get("days_back") or 2
 	include_all = filters.get("include_all") or 0
 
-	item_filters: dict[str, Any] = {"disabled": 0}
+	item_filters: dict[str, Any] = {"disabled": 0, "is_stock_item": 1}
 	if item_group and not include_all:
 		item_filters["item_group"] = item_group
 

@@ -251,7 +251,7 @@ export default {
 			);
 		});
 		const isModifiedTabVisible = computed(() => {
-			return currentList.value.length === 0 && state.index === 0;
+			return !stockTakingMode.value && currentList.value.length === 0 && state.index === 0;
 		});
 
 		function triggerDimEffect() {
@@ -456,11 +456,11 @@ export default {
 			}
 		});
 
-		// TODO: Fix this, only subscribe when it is visible instead of forever
 		watch(isModifiedTabVisible, (visible) => {
 			if (visible) {
-				// Tab became visible, ensure auto-refresh is running
 				startAutoRefresh();
+			} else {
+				stopAutoRefresh();
 			}
 		});
 

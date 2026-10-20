@@ -132,33 +132,6 @@ def get_recently_modified_items(force_refresh: bool = False, limit: int = 50) ->
 
 
 @frappe.whitelist()
-def get_stock_level(item_code: str) -> float | None:
-	"""
-	Retrieves the stock quantity for an item.
-
-	Args:
-		item_code: Item code to get stock for
-
-	Returns:
-		Actual quantity in stock, or None if not found
-
-	Raises:
-		frappe.PermissionError: If user is not logged in
-	"""
-	if not item_code:
-		return None
-
-	try:
-		bin_entry = frappe.get_value(
-			"Bin", filters={"item_code": item_code}, fieldname="actual_qty", ignore_permissions=True
-		)
-		return bin_entry if bin_entry is not None else None
-	except Exception as e:
-		frappe.log_error(f"Failed to fetch stock level for item {item_code}: {e!s}")
-		return None
-
-
-@frappe.whitelist()
 def get_item_selling_price(
 	item_code: str, price_list: str | None = None, uom: str | None = None
 ) -> float | None:
@@ -395,6 +368,7 @@ def _fetch_item_details(item_code: str, uom: str | None = None) -> dict[str, Any
 		# TODO: Handler and Service logic concerns are mixed here
 		return {
 			"item_code": item.name,
+			"is_stock_item": item.is_stock_item if hasattr(item, "is_stock_item") else False,
 			"item_name": item.item_name,
 			"item_group": item.item_group,
 			"suppliers": [s.supplier for s in item.supplier_items] if hasattr(item, "supplier_items") else [],

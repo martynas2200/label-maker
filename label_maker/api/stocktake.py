@@ -47,6 +47,9 @@ def save_stock_check(
 	if actual_qty is None:
 		frappe.throw(_("Actual quantity is required"))
 
+	if actual_qty < 0:
+		frappe.throw(_("Actual quantity cannot be negative"))
+
 	# Fetch system qty if not provided
 	if system_qty is None:
 		try:

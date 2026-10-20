@@ -270,7 +270,7 @@ export default {
 	name: "StockTakingView",
 	components: { Button, FeatherIcon, BarcodeInput },
 	emits: ["exit"],
-	setup(props, { emit }) {
+	setup() {
 		const stockTakeService = getStockTakeService();
 		const tts = getTTSService();
 
@@ -279,12 +279,20 @@ export default {
 		const actualQty = ref(null);
 		const lastCheck = ref(null);
 		const saving = ref(false);
-		const saved = ref(false);
 		const checkedItems = ref([]);
+		let scanVersion = 0;
 
 		const { barcode, barcodeInputRef, focusInput, handleScan } = useBarcodeScanner({
 			active: ref(true),
 			onItem: async ({ item, packagedWeight }) => {
+				const currentScanVersion = ++scanVersion;
+				if (!item.is_stock_item) {
+					toast({
+						title: "Item ${item.item_code} does not maintain stock",
+					});
+					return;
+				}
+
 				// Load last check info
 				let last = null;
 				try {
@@ -292,12 +300,12 @@ export default {
 				} catch (_) {
 					// Ignore errors fetching last check
 				}
+				if (currentScanVersion !== scanVersion) return;
+
 				currentItem.value = item;
 				systemQty.value = item.stock_qty ?? 0;
 				lastCheck.value = last;
 				actualQty.value = packagedWeight > 0 ? packagedWeight : null;
-				saved.value = false;
-
 				// Speak the system quantity
 				const qty = item.stock_qty ?? 0;
 				if (qty > 0) {
@@ -336,6 +344,8 @@ export default {
 			if (actualQty.value === null && actualQty.value !== 0) return;
 			if (!currentItem.value) return;
 
+			const itemToSave = currentItem.value;
+			const systemQtyToSave = systemQty.value;
 			const qty = Number(actualQty.value);
 			if (isNaN(qty)) {
 				toast({
@@ -348,12 +358,11 @@ export default {
 
 			saving.value = true;
 			try {
-				const record = await stockTakeService.saveCheck(currentItem.value.item_code, qty, {
-					item_name: currentItem.value.item_name,
-					system_qty: systemQty.value,
+				const record = await stockTakeService.saveCheck(itemToSave.item_code, qty, {
+					item_name: itemToSave.item_name,
+					system_qty: systemQtyToSave,
 				});
 
-				saved.value = true;
 				checkedItems.value = [
 					{
 						item_code: record.item_code,
@@ -373,7 +382,7 @@ export default {
 				});
 
 				// Auto-reset for the next scan
-				dismissItem();
+				if (currentItem.value === itemToSave) dismissItem();
 			} catch (e) {
 				toast({
 					text: String(e?.message || e),
@@ -406,7 +415,6 @@ export default {
 			systemQty.value = null;
 			actualQty.value = null;
 			lastCheck.value = null;
-			saved.value = false;
 			focusInput();
 		}
 
@@ -418,7 +426,6 @@ export default {
 			actualQty,
 			lastCheck,
 			saving,
-			saved,
 			checkedItems,
 			difference,
 			mismatchCount,
