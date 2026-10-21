@@ -6,10 +6,10 @@
 					<div>
 						<!-- TODO: Consider passing a prop for title instead -->
 						<h1 class="text-2xl font-bold text-gray-900" v-if="!stockTakingMode">
-							{{ $t("Labels") }}
+							{{ $t("labels") }}
 						</h1>
 						<h1 class="text-2xl font-bold text-gray-900" v-else>
-							{{ $t("Stock Taking") }}
+							{{ $t("stock_taking") }}
 						</h1>
 						<div
 							v-if="wsConnected"
@@ -20,14 +20,14 @@
 							<span
 								class="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"
 							></span>
-							<span v-show="showConnectedText">{{ $t("Scanner connected") }}</span>
+							<span v-show="showConnectedText">{{ $t("scanner_connected") }}</span>
 						</div>
 						<div
 							v-else-if="showReconnectButton"
 							class="flex items-center gap-2 text-sm text-red-600"
 						>
 							<span class="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-							<span>{{ $t("Scanner disconnected") }}</span>
+							<span>{{ $t("scanner_disconnected") }}</span>
 						</div>
 					</div>
 				</div>
@@ -38,81 +38,80 @@
 						@click="$emit('reconnect')"
 						variant="solid"
 					>
-						<i class="fa fa-plug mr-1"></i>{{ $t("Reconnect") }}
+						<i class="fa fa-plug mr-1"></i>{{ $t("reconnect") }}
 					</Button>
 					<Dropdown
 						:options="[
 							{
-								group: $t('Options'),
+								group: $t('options'),
 								items: [
 									{
-										label: $t('Show Stock Qty'),
+										label: $t('show_stock_qty'),
 										switch: true,
 										switchValue: showStockQty,
 										onClick: (val) => $emit('update:showStockQty', val),
 									},
+									wsConnected
+										? {
+												label: $t('show_input'),
+												switch: true,
+												switchValue: showInputManually,
+												onClick: (val) =>
+													$emit('update:showInputManually', val),
+										  }
+										: null,
 									{
-										label: $t('Show Input'),
-										switch: true,
-										switchValue: showInputManually,
-										onClick: (val) => $emit('update:showInputManually', val),
-									},
-									{
-										label: $t('Speak Price'),
+										label: $t('speak_price'),
 										switch: true,
 										switchValue: speakPrice,
 										onClick: (val) => $emit('update:speakPrice', val),
 									},
 									{
-										label: $t('Speak Quantity'),
+										label: $t('speak_quantity'),
 										switch: true,
 										switchValue: speakQuantity,
 										onClick: (val) => $emit('update:speakQuantity', val),
 									},
 									{
-										label: $t('Cards View'),
+										label: $t('cards_view'),
 										switch: true,
 										switchValue: cardsView,
 										onClick: (val) => $emit('update:cardsView', val),
 									},
 									{
-										label: !stockTakingMode ? $t('Stock Take') : $t('Labels'),
-										icon: 'clipboard',
+										label: !stockTakingMode ? $t('stock_take') : $t('labels'),
+										icon: 'repeat',
 										onClick: () =>
 											$emit('update:stockTakingMode', !stockTakingMode),
 									},
 								],
 							},
 							{
-								group: $t('Navigation'),
+								group: $t('navigation'),
 								items: [
+									...(apps.data || []).map((app) => ({
+										label: app.title,
+										icon: app.logo,
+										component: h(
+											'a',
+											{
+												class: 'flex items-center gap-2 p-1.5 rounded hover:bg-surface-gray-2',
+												href: app.route,
+											},
+											[
+												h('img', { src: app.logo, class: 'size-6' }),
+												h(
+													'span',
+													{
+														class: 'max-w-18 text-base text-ink-gray-7 w-full truncate',
+													},
+													app.title
+												),
+											]
+										),
+									})),
 									{
-										icon: 'grid',
-										label: $t('Apps'),
-										submenu: apps.data?.map((app) => ({
-											label: app.title,
-											icon: app.logo,
-											component: h(
-												'a',
-												{
-													class: 'flex items-center gap-2 p-1.5 rounded hover:bg-surface-gray-2',
-													href: app.route,
-												},
-												[
-													h('img', { src: app.logo, class: 'size-6' }),
-													h(
-														'span',
-														{
-															class: 'max-w-18 text-sm w-full truncate',
-														},
-														app.title
-													),
-												]
-											),
-										})),
-									},
-									{
-										label: $t('Log out'),
+										label: $t('log_out'),
 										icon: 'log-out',
 										onClick: this.logOut,
 									},
@@ -131,7 +130,7 @@
 						variant="subtle"
 						theme="red"
 					>
-						<i class="fa fa-trash mr-2"></i>{{ $t("Clear") }}
+						<i class="fa fa-trash mr-2"></i>{{ $t("clear") }}
 					</Button>
 					<Button
 						v-if="!stockTakingMode"
@@ -142,7 +141,7 @@
 						theme="blue"
 					>
 						<i class="fa fa-print mr-2"></i>
-						{{ $t("Print") }} ({{ currentListLength }})
+						{{ $t("print") }} ({{ currentListLength }})
 					</Button>
 				</div>
 			</div>

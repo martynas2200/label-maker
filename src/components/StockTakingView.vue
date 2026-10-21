@@ -3,8 +3,8 @@
 		<BarcodeInput
 			ref="barcodeInputRef"
 			v-model="barcode"
-			@scan="handleScan"
-			:placeholder="$t('Scan item barcode to start counting...')"
+			@scan="processBarcode"
+			:placeholder="$t('scan_item_barcode_to_start_counting')"
 		/>
 
 		<div
@@ -39,7 +39,7 @@
 				<div class="mt-4 grid grid-cols-2 gap-3">
 					<div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
 						<p class="text-xs text-gray-500 font-medium uppercase tracking-wider">
-							{{ $t("System Qty") }}
+							{{ $t("system_qty") }}
 						</p>
 						<p class="mt-1 text-xl font-bold text-gray-900">
 							{{ systemQty }}
@@ -54,7 +54,7 @@
 						"
 					>
 						<p class="text-xs text-gray-500 font-medium uppercase tracking-wider">
-							{{ $t("Difference") }}
+							{{ $t("difference") }}
 						</p>
 						<p
 							class="mt-1 text-xl font-bold"
@@ -76,11 +76,11 @@
 				</div>
 
 				<!-- Actual qty input + save -->
-				<div class="mt-4 flex items-end gap-3">
-					<div class="flex-1">
-						<label class="block text-sm font-medium text-gray-700 mb-1">
-							{{ $t("Actual Counted Qty") }}
-						</label>
+				<div class="mt-4">
+					<label class="block text-sm font-medium text-gray-700 mb-1">
+						{{ $t("actual_counted_qty") }}
+					</label>
+					<div class="flex gap-3">
 						<input
 							v-model.number="actualQty"
 							type="number"
@@ -92,18 +92,19 @@
 							@keyup.escape="dismissItem"
 							autofocus
 						/>
+						<Button
+							:loading="saving"
+							:disabled="!actualQty && actualQty !== 0"
+							@click="saveCheck"
+							variant="solid"
+							theme="green"
+							style="height: unset"
+							class="mb-0.5"
+						>
+							<i class="fa fa-check mr-2"></i>
+							{{ $t("save_check") }}
+						</Button>
 					</div>
-					<Button
-						:loading="saving"
-						:disabled="!actualQty && actualQty !== 0"
-						@click="saveCheck"
-						variant="solid"
-						theme="green"
-						class="mb-0.5"
-					>
-						<i class="fa fa-check mr-2"></i>
-						{{ $t("Save Check") }}
-					</Button>
 				</div>
 
 				<!-- Last check info + save with previous -->
@@ -125,28 +126,28 @@
 								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 							/>
 						</svg>
-						{{ $t("Last check") }}:
+						{{ $t("last_check") }}:
 						<span class="font-medium text-gray-600">{{
 							formatDate(lastCheck.checked_at)
 						}}</span>
 					</span>
 					<span class="text-gray-300">|</span>
 					<span
-						>{{ $t("System") }}:
+						>{{ $t("system") }}:
 						<span class="font-mono font-medium text-gray-600">{{
 							lastCheck.system_qty
 						}}</span></span
 					>
 					<span class="text-gray-300">|</span>
 					<span
-						>{{ $t("Counted") }}:
+						>{{ $t("counted") }}:
 						<span class="font-mono font-medium text-gray-600">{{
 							lastCheck.actual_qty
 						}}</span></span
 					>
 					<span class="text-gray-300">|</span>
 					<span>
-						{{ $t("Diff") }}:
+						{{ $t("diff") }}:
 						<span
 							class="font-mono font-semibold"
 							:class="
@@ -164,7 +165,7 @@
 						@click="saveWithPrevious"
 						class="ml-auto text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline whitespace-nowrap"
 					>
-						{{ $t("Save with previous") }}
+						{{ $t("save_with_previous") }}
 					</button>
 				</div>
 			</div>
@@ -188,10 +189,10 @@
 				</svg>
 			</div>
 			<p class="text-gray-500 text-lg font-medium">
-				{{ $t("Scan items to start stock taking") }}
+				{{ $t("scan_items_to_start_stock_taking") }}
 			</p>
 			<p class="text-gray-400 text-sm mt-1">
-				{{ $t("Items will appear here as you scan them") }}
+				{{ $t("items_will_appear_here_as_you_scan_them") }}
 			</p>
 		</div>
 
@@ -202,12 +203,12 @@
 		>
 			<div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-800">
-					{{ $t("Checked Items") }}
+					{{ $t("checked_items") }}
 					<span class="text-gray-400 font-normal ml-1">({{ checkedItems.length }})</span>
 				</h3>
 				<div class="flex gap-2">
 					<span class="text-xs text-gray-400">
-						{{ $t("Mismatches") }}:
+						{{ $t("mismatches") }}:
 						<span
 							class="font-semibold"
 							:class="mismatchCount > 0 ? 'text-red-500' : 'text-green-500'"
@@ -232,13 +233,13 @@
 					</div>
 					<div class="text-right">
 						<p class="text-sm text-gray-500">
-							{{ $t("Sys") }}: <span class="font-mono">{{ item.system_qty }}</span>
+							{{ $t("sys") }}: <span class="font-mono">{{ item.system_qty }}</span>
 						</p>
 						<p
 							class="text-sm font-semibold"
 							:class="item.difference === 0 ? 'text-green-600' : 'text-red-600'"
 						>
-							{{ $t("Act") }}: <span class="font-mono">{{ item.actual_qty }}</span>
+							{{ $t("act") }}: <span class="font-mono">{{ item.actual_qty }}</span>
 						</p>
 					</div>
 					<div
@@ -258,21 +259,29 @@
 </template>
 
 <script>
-import { ref, computed, nextTick } from "vue";
+import { ref, computed, nextTick, watch } from "vue";
 import { Button, FeatherIcon } from "frappe-ui";
 import { useBarcodeScanner } from "../composables/useBarcodeScanner";
 import { getStockTakeService } from "../api/stocktake";
 import { getTTSService } from "../api/tts";
 import { toast } from "../helpers/toast";
+import { useI18n } from "vue-i18n";
 import BarcodeInput from "./BarcodeInput.vue";
 
 export default {
 	name: "StockTakingView",
 	components: { Button, FeatherIcon, BarcodeInput },
-	emits: ["exit"],
-	setup() {
+	props: {
+		initialBarcode: {
+			type: String,
+			default: "",
+		},
+	},
+	emits: ["exit", "initial-barcode-processed"],
+	setup(props, { emit }) {
 		const stockTakeService = getStockTakeService();
 		const tts = getTTSService();
+		const { t } = useI18n();
 
 		const currentItem = ref(null);
 		const systemQty = ref(null);
@@ -282,13 +291,16 @@ export default {
 		const checkedItems = ref([]);
 		let scanVersion = 0;
 
-		const { barcode, barcodeInputRef, focusInput, handleScan } = useBarcodeScanner({
+		const { barcode, barcodeInputRef, focusInput, processBarcode } = useBarcodeScanner({
 			active: ref(true),
+			onInventoryCommand: (inventoryBarcode) => processBarcode(inventoryBarcode),
 			onItem: async ({ item, packagedWeight }) => {
 				const currentScanVersion = ++scanVersion;
 				if (!item.is_stock_item) {
 					toast({
-						title: "Item ${item.item_code} does not maintain stock",
+						title: t("item_not_stock_item", {
+							item_code: item.item_code,
+						}),
 					});
 					return;
 				}
@@ -309,7 +321,7 @@ export default {
 				// Speak the system quantity
 				const qty = item.stock_qty ?? 0;
 				if (qty > 0) {
-					tts.speak(tts.numberToWords(qty));
+					tts.speak("quantity", qty);
 				}
 			},
 			// Focus the quantity input after a successful scan
@@ -319,6 +331,17 @@ export default {
 				if (qtyInput) qtyInput.focus();
 			},
 		});
+
+		watch(
+			() => props.initialBarcode,
+			async (inventoryBarcode) => {
+				if (inventoryBarcode) {
+					await processBarcode(inventoryBarcode);
+					emit("initial-barcode-processed");
+				}
+			},
+			{ immediate: true }
+		);
 
 		const difference = computed(() => {
 			if (systemQty.value === null || actualQty.value === null) return null;
@@ -349,8 +372,7 @@ export default {
 			const qty = Number(actualQty.value);
 			if (isNaN(qty)) {
 				toast({
-					title: "Invalid quantity",
-					icon: "x",
+					title: t("invalid_quantity"),
 					variant: "warning",
 				});
 				return;
@@ -375,9 +397,12 @@ export default {
 				];
 
 				toast({
-					title: `Checked: ${record.item_code}`,
-					text: `Counted ${qty}, system had ${systemQty.value}`,
-					icon: "check",
+					title: t("checked_item", { item_code: itemToSave.item_code }),
+					text: t("counted_system_quantity", {
+						qty,
+						systemQty: systemQtyToSave,
+					}),
+					variant: "success",
 					timeout: 2,
 				});
 
@@ -386,7 +411,6 @@ export default {
 			} catch (e) {
 				toast({
 					text: String(e?.message || e),
-					icon: "x",
 					variant: "warning",
 				});
 			} finally {
@@ -402,7 +426,7 @@ export default {
 			const newQty = prevQty + currentEntry;
 
 			const confirmed = window.confirm(
-				`Take the previous count (${prevQty}) and add the currently entered value (${currentEntry}), saving as ${newQty}?`
+				t("take_previous_count", { prevQty, currentEntry, newQty })
 			);
 			if (!confirmed) return;
 
@@ -430,7 +454,7 @@ export default {
 			difference,
 			mismatchCount,
 			formatDate,
-			handleScan,
+			processBarcode,
 			saveCheck,
 			saveWithPrevious,
 			dismissItem,

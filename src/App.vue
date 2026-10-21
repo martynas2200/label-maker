@@ -20,7 +20,12 @@
 		<!-- Main Content -->
 		<div class="max-w-7xl py-6 px-6 mx-auto">
 			<!-- Stock Taking View -->
-			<StockTakingView v-if="stockTakingMode" @exit="stockTakingMode = false" />
+			<StockTakingView
+				v-if="stockTakingMode"
+				:initial-barcode="pendingInventoryBarcode"
+				@exit="stockTakingMode = false"
+				@initial-barcode-processed="pendingInventoryBarcode = ''"
+			/>
 
 			<!-- Normal label mode content -->
 			<template v-else>
@@ -29,7 +34,7 @@
 					v-if="!wsConnected || showInputManually"
 					ref="barcodeInputRef"
 					v-model="barcode"
-					@scan="handleScan"
+					@scan="processBarcode"
 				/>
 
 				<!-- Current List Section (shown when there are items) -->
@@ -156,26 +161,20 @@ export default {
 		const tts = getTTSService();
 
 		const tabs = [
-			{ label: t("Recently Modified"), key: "modified" },
-			{ label: t("Recently Scanned"), key: "scanned" },
+			{ label: t("recently_modified"), key: "modified" },
+			{ label: t("recently_scanned"), key: "scanned" },
 		];
 
+		const readStoredBoolean = (key, defaultValue) => {
+			const value = localStorage.getItem(key);
+			return value === null ? defaultValue : value === "true";
+		};
+		const storedSpeakPrice = readStoredBoolean("speakPrice", true);
+		const storedSpeakQuantity = readStoredBoolean("speakQuantity", false);
 		const state = reactive({ index: 0 });
-		const showStockQty = ref(
-			localStorage.getItem("showStockQty") !== null
-				? localStorage.getItem("showStockQty") === "true"
-				: false
-		);
-		const speakPrice = ref(
-			localStorage.getItem("speakPrice") !== null
-				? localStorage.getItem("speakPrice") === "true"
-				: true
-		);
-		const speakQuantity = ref(
-			localStorage.getItem("speakQuantity") !== null
-				? localStorage.getItem("speakQuantity") === "true"
-				: false
-		);
+		const showStockQty = ref(readStoredBoolean("showStockQty", false));
+		const speakPrice = ref(storedSpeakPrice && !storedSpeakQuantity);
+		const speakQuantity = ref(storedSpeakQuantity);
 		const currentList = ref([]); // Items ready to print
 		const recentlyScanned = ref(
 			localStorage.getItem("recentlyScanned")
@@ -185,9 +184,10 @@ export default {
 		const recentlyModified = ref([]);
 		const loadingModified = ref(false);
 		const printing = ref(false);
-		const cardsView = ref(true);
-		const showInputManually = ref(false);
+		const cardsView = ref(readStoredBoolean("cardsView", true));
+		const showInputManually = ref(readStoredBoolean("showInputManually", false));
 		const stockTakingMode = ref(false);
+		const pendingInventoryBarcode = ref("");
 		const weightModalOpen = ref(false);
 		const weightModalItem = ref(null);
 		const itemDetailsModalOpen = ref(false);
@@ -196,8 +196,12 @@ export default {
 		let dimTimer = null;
 		let autoRefreshTimer = null;
 
-		const { barcode, barcodeInputRef, focusInput, handleScan } = useBarcodeScanner({
+		const { barcode, barcodeInputRef, focusInput, processBarcode } = useBarcodeScanner({
 			active: computed(() => !stockTakingMode.value),
+			onInventoryCommand: (inventoryBarcode) => {
+				pendingInventoryBarcode.value = inventoryBarcode;
+				stockTakingMode.value = true;
+			},
 			onItem: ({ item, isPackaged, packagedWeight }) => {
 				// Add to current list (remove duplicates, keep order)
 				currentList.value = [
@@ -219,24 +223,22 @@ export default {
 				if (speakQuantity.value) {
 					const qty = item.stock_qty || 0;
 					if (qty > 0) {
-						tts.speak(tts.numberToWords(qty));
+						tts.speak("quantity", qty);
 					}
 				} else if (speakPrice.value) {
 					const price = isPackaged ? item.total_price : item.standard_rate || 0;
 					if (price > 0) {
-						tts.speak(tts.digitsToPrice(price));
+						tts.speak("price", price);
 					}
 				}
 
 				const message = isPackaged
-					? `Packaged item added: ${item.item_code} - ${
-							item.item_name
-					  } (${packagedWeight.toFixed(3)} kg)`
-					: `Item added: ${item.item_code} - ${item.item_name}`;
+					? t("packaged_item_added", { code: item.item_code })
+					: t("item_added", { code: item.item_code });
 
 				toast({
 					title: message,
-					icon: "check",
+					variant: "success",
 					timeout: 2,
 				});
 			},
@@ -272,8 +274,8 @@ export default {
 				recentlyModified.value = await itemService.getRecentlyModifiedItems(forced);
 				if (recentlyModified.value.length > 0 && forced) {
 					toast({
-						title: `Loaded ${recentlyModified.value.length} items`,
-						icon: "check",
+						title: t("loaded_items", { count: recentlyModified.value.length }),
+						variant: "success",
 						timeout: 2,
 					});
 				}
@@ -282,9 +284,8 @@ export default {
 				// Only show error toast if it was a manual refresh
 				if (forced) {
 					toast({
-						title: "Failed to load items",
+						title: t("failed_to_load_items"),
 						text: String(e?.message || e),
-						icon: "x",
 						variant: "warning",
 					});
 				}
@@ -313,9 +314,8 @@ export default {
 		async function onPrint() {
 			if (currentList.value.length === 0) {
 				toast({
-					title: "No items to print",
-					text: "Please add some items first",
-					icon: "alert",
+					title: t("nothing_to_print"),
+					text: t("please_add_some_items_first"),
 					variant: "warning",
 				});
 				return;
@@ -330,23 +330,19 @@ export default {
 				// const codes = currentList.value.map((i) => i.item_code)
 				// await labels.printLabels(codes, defaultLabelType)
 
-				// Option 2: Use frontend LabelGenerator directly (old class, but faster, no backend call)
-				new LabelGenerator(currentList.value, defaultLabelType, settings).then(() => {
-					toast({
-						title: `Printing ${currentList.value.length} labels`,
-						text: `Label type: ${defaultLabelType}`,
-						icon: "check",
-					});
+				// Option 2: Use frontend old LabelGenerator directly
+				new LabelGenerator(currentList.value, defaultLabelType, settings);
+				toast({
+					title: t("printing_labels", { count: currentList.value.length }),
+					variant: "success",
 				});
 
-				// Move items to history and clear current list
 				currentList.value = [];
 			} catch (e) {
 				console.error("Print error:", e);
 				toast({
-					title: "Print failed",
+					title: t("print_failed"),
 					text: String(e?.message || e),
-					icon: "x",
 					variant: "warning",
 				});
 			} finally {
@@ -364,9 +360,8 @@ export default {
 			triggerDimEffect();
 
 			toast({
-				title: "Item added to print list",
-				text: `${item.item_code}`,
-				icon: "check",
+				title: t("item_added_to_print_list"),
+				variant: "success",
 				timeout: 2,
 			});
 		}
@@ -378,8 +373,8 @@ export default {
 		function clearCurrentList() {
 			currentList.value = [];
 			toast({
-				title: "List cleared",
-				icon: "check",
+				title: t("list_cleared"),
+				variant: "success",
 				timeout: 5,
 			});
 		}
@@ -404,8 +399,8 @@ export default {
 
 		function handleReconnect() {
 			toast({
-				title: "Reconnecting websocket...",
-				icon: "refresh-cw",
+				title: t("reconnecting_websocket"),
+				variant: "info",
 				timeout: 2,
 			});
 			websocket.manualReconnect();
@@ -436,25 +431,31 @@ export default {
 			} catch (e) {
 				console.error("Initialization error:", e);
 				toast({
-					title: "Initialization failed",
+					title: t("initialization_failed"),
 					text: String(e?.message || e),
-					icon: "x",
 					variant: "warning",
 				});
 			}
 		});
 
-		// Persist settings to localStorage
-		watch(showStockQty, (v) => localStorage.setItem("showStockQty", v));
-		watch(speakPrice, (v) => localStorage.setItem("speakPrice", v));
-		watch(speakQuantity, (v) => localStorage.setItem("speakQuantity", v));
-
-		// Auto-focus input when toggling manual input
-		watch(showInputManually, (v) => {
-			if (v) {
+		watch(showStockQty, (value) => localStorage.setItem("showStockQty", String(value)));
+		watch(cardsView, (value) => localStorage.setItem("cardsView", String(value)));
+		watch(showInputManually, (value) => {
+			localStorage.setItem("showInputManually", String(value));
+			if (value) {
 				setTimeout(() => focusInput(), 100);
 			}
 		});
+		watch(speakPrice, (value) => {
+			if (value) speakQuantity.value = false;
+			localStorage.setItem("speakPrice", String(value));
+		});
+		watch(speakQuantity, (value) => {
+			if (value) speakPrice.value = false;
+			localStorage.setItem("speakQuantity", String(value));
+		});
+
+		// Auto-focus input when toggling manual input
 
 		watch(isModifiedTabVisible, (visible) => {
 			if (visible) {
@@ -489,10 +490,11 @@ export default {
 			cardsView,
 			showInputManually,
 			stockTakingMode,
+			pendingInventoryBarcode,
 			weightModalOpen,
 			weightModalItem,
 			showDimEffect,
-			handleScan,
+			processBarcode,
 			onPrint,
 			loadRecentlyModified,
 			addToCurrent,

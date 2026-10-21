@@ -9,7 +9,7 @@ export interface ScanResult {
   packagedWeight: number;
 }
 
-export async function scanBarcode(code: string): Promise<ScanResult | null> {
+export async function resolveBarcodeScan(code: string): Promise<ScanResult | null> {
   const trimmed = (code || "").trim();
   if (!trimmed) return null;
 

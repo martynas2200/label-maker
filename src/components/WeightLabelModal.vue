@@ -1,17 +1,17 @@
 <template>
-	<Dialog v-model="open" :options="{ size: 'xl', title: $t('Weight Label') }">
+	<Dialog v-model="open" :options="{ size: 'xl', title: $t('weight_label') }">
 		<template #body-content>
 			<div class="space-y-4">
 				<div class="grid grid-cols-12 gap-4">
 					<div class="col-span-12">
-						<label class="block text-sm text-gray-600 mb-1">{{ $t("Name") }}</label>
+						<label class="block text-sm text-gray-600 mb-1">{{ $t("name") }}</label>
 						<Input :value="item.item_name" readonly />
 					</div>
 					<div class="col-span-6 sm:col-span-4">
 						<label
 							class="block text-sm mb-1 transition-colors"
 							:class="scaleActive ? 'text-green-600 font-semibold' : 'text-gray-600'"
-							>{{ $t("Quantity (g/vnt.)") }}</label
+							>{{ $t("quantity_g_vnt") }}</label
 						>
 						<div
 							class="transition-all rounded-md"
@@ -38,13 +38,13 @@
 					</div>
 					<div class="col-span-6 sm:col-span-4">
 						<label class="block text-sm text-gray-600 mb-1"
-							>{{ $t("Price per ") }} {{ item.stock_uom }}</label
+							>{{ $t("price_per") }} {{ item.stock_uom }}</label
 						>
 						<Input v-model="pricePerKg" type="number" step="0.01" disabled="true" />
 					</div>
 					<div class="col-span-6 sm:col-span-4">
 						<label class="block text-sm text-gray-600 mb-1">{{
-							$t("Total Price")
+							$t("total_price")
 						}}</label>
 						<Input :value="totalPrice.toFixed(2)" readonly />
 					</div>
@@ -54,7 +54,7 @@
 					<div class="col-span-12 sm:col-span-6 flex flex-col gap-3">
 						<div>
 							<label class="block text-sm text-gray-600 mb-1">{{
-								$t("Expiry Date")
+								$t("expiry_date")
 							}}</label>
 							<Input v-model="expiryDate" type="date" />
 						</div>
@@ -62,7 +62,7 @@
 							class="mt-2"
 							v-model="addManufacturer"
 							:label="
-								$t('Add manufacturer') +
+								$t('add_manufacturer') +
 								' ' +
 								(item.default_item_manufacturer || '')
 							"
@@ -71,7 +71,7 @@
 						<Checkbox
 							class="mt-2"
 							v-model="addPackageFee"
-							:label="$t('Add package fee')"
+							:label="$t('add_package_fee')"
 						/>
 					</div>
 					<div class="col-span-12 sm:col-span-6">
@@ -102,14 +102,14 @@
 								"
 							>
 								<template v-if="scaleReceivedWeight">{{
-									$t("Scale active")
+									$t("scale_active")
 								}}</template>
-								<template v-else>{{ $t("Waiting for scale…") }}</template>
+								<template v-else>{{ $t("waiting_for_scale") }}</template>
 							</span>
 							<Checkbox
 								v-if="scaleReceivedWeight"
 								v-model="scaleDisabled"
-								:label="$t('Disable scale')"
+								:label="$t('disable_scale')"
 							/>
 						</div>
 					</div>
@@ -118,7 +118,7 @@
 		</template>
 		<template #actions="{ close }">
 			<div class="flex justify-end gap-2">
-				<Button @click="close" variant="outline">{{ $t("Close") }}</Button>
+				<Button @click="close" variant="outline">{{ $t("close") }}</Button>
 				<Button
 					@click="print"
 					:loading="printing"
@@ -126,7 +126,7 @@
 					variant="solid"
 					theme="blue"
 				>
-					<i class="fa fa-print mr-1" /> {{ $t("Print") }}
+					<i class="fa fa-print mr-1" /> {{ $t("print") }}
 				</Button>
 			</div>
 		</template>
@@ -136,6 +136,7 @@
 <script>
 import { Dialog, Input, Button, Checkbox } from "frappe-ui";
 import { ref, computed, watch, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { getSettingsService } from "../api/settings";
 import { LabelGenerator } from "./../helpers/labelGenerator";
 import { toast } from "./../helpers/toast";
@@ -150,7 +151,7 @@ export default {
 	emits: ["update:modelValue", "printed"],
 	setup(props, { emit }) {
 		const settings = getSettingsService();
-
+		const { t } = useI18n();
 		console.log("WeightLabelModal setup - initial modelValue:", props.modelValue);
 		console.log("WeightLabelModal setup - item:", props.item);
 
@@ -188,9 +189,8 @@ export default {
 				if (!warnedLarge.value) {
 					warnedLarge.value = true;
 					toast({
-						title: "Quantity too large",
-						text: "Value is 10 or more — reset to 0",
-						icon: "x",
+						title: t("quantity_too_large"),
+						text: t("value_is_10_or_more_reset_to_0"),
 						variant: "warning",
 					});
 				}
@@ -263,14 +263,13 @@ export default {
 				};
 				new LabelGenerator([item_to_print], "normal", cfg);
 
-				toast({ title: "Label sent to printer", icon: "check" });
+				toast({ title: t("label_sent_to_printer"), variant: "success" });
 				emit("printed", { item_code: props.item.item_code });
 			} catch (e) {
 				console.error(e);
 				toast({
-					title: "Print failed",
+					title: t("print_failed"),
 					text: String(e?.message || e),
-					icon: "x",
 					variant: "warning",
 				});
 			} finally {

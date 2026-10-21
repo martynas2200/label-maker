@@ -1,78 +1,33 @@
-/**
- * Toast notification helper
- * Uses frappe.show_alert if available, otherwise shows a simple notification
- */
+const VARIANT_STYLES = {
+	success: { bg: "#10b981", border: "#059669" },
+	error: { bg: "#ef4444", border: "#dc2626" },
+	warning: { bg: "#f59e0b", border: "#d97706" },
+	info: { bg: "#3b82f6", border: "#2563eb" },
+};
 
 /**
- * Show a toast notification
- * @param {Object} config - Toast configuration
- * @param {string} config.title - Toast title
- * @param {string} config.text - Toast message text
- * @param {string} config.icon - Icon type: 'check', 'x', 'alert', 'info'
- * @param {number} config.timeout - Duration in seconds (default: 3)
+ * Show a toast notification.
+ *
+ * @param {{
+ *   title?: string,
+ *   text?: string,
+ *   variant?: 'success'|'error'|'warning'|'info',
+ *   timeout?: number
+ * }} config
  */
-export function toast(config) {
-	const { title, text, icon = "info", timeout = 3 } = config;
-
-	// Build the message
-	const message = title ? title + (text ? ` - ${text}` : "") : text;
-
-	// If frappe is available, use its alert system
-	if (window.frappe && window.frappe.show_alert) {
-		const indicator =
-			icon === "check"
-				? "green"
-				: icon === "x"
-				? "red"
-				: icon === "alert"
-				? "orange"
-				: "blue";
-
-		window.frappe.show_alert(
-			{
-				message,
-				indicator,
-			},
-			timeout
-		);
-		return;
-	}
-
-	showFallbackToast(message, icon, timeout);
+export function toast({ title, text, variant = "info", timeout = 3 } = {}) {
+	const message = title && text ? `${title} - ${text}` : title || text || "";
+	showDomToast(message, variant, timeout);
 }
 
-function showFallbackToast(message, icon, timeout) {
-	// Create toast container if it doesn't exist
-	let container = document.getElementById("toast-container");
-	if (!container) {
-		container = document.createElement("div");
-		container.id = "toast-container";
-		container.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      pointer-events: none;
-    `;
-		document.body.appendChild(container);
-	}
+function showDomToast(message, variant, timeout) {
+	const container = getToastContainer();
+	const { bg, border } = VARIANT_STYLES[variant] || VARIANT_STYLES.info;
 
-	// Create toast element
-	const toast = document.createElement("div");
-	const colors = {
-		check: { bg: "#10b981", border: "#059669" },
-		x: { bg: "#ef4444", border: "#dc2626" },
-		alert: { bg: "#f59e0b", border: "#d97706" },
-		info: { bg: "#3b82f6", border: "#2563eb" },
-	};
-	const color = colors[icon] || colors.info;
-
-	toast.style.cssText = `
-    background: ${color.bg};
-    border-left: 4px solid ${color.border};
+	const el = document.createElement("div");
+	el.style.cssText = `
+    background: ${bg};
+    border-left: 4px solid ${border};
     color: white;
     padding: 12px 20px;
     border-radius: 6px;
@@ -82,50 +37,57 @@ function showFallbackToast(message, icon, timeout) {
     max-width: 350px;
     word-wrap: break-word;
     pointer-events: auto;
-    animation: slideIn 0.3s ease-out;
+    animation: toastSlideIn 0.3s ease-out;
   `;
-	toast.textContent = message;
+	el.textContent = message;
+	container.appendChild(el);
 
-	// Add animation keyframes if not already added
-	if (!document.getElementById("toast-styles")) {
-		const style = document.createElement("style");
-		style.id = "toast-styles";
-		style.textContent = `
-      @keyframes slideIn {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      @keyframes slideOut {
-        from {
-          transform: translateX(0);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(100%);
-          opacity: 0;
-        }
-      }
-    `;
-		document.head.appendChild(style);
-	}
+	ensureToastStyles();
 
-	container.appendChild(toast);
-
-	// Auto-remove after timeout
 	setTimeout(() => {
-		toast.style.animation = "slideOut 0.3s ease-in";
+		el.style.animation = "toastSlideOut 0.3s ease-in";
 		setTimeout(() => {
-			container.removeChild(toast);
-			// Remove container if empty
+			el.remove();
 			if (container.children.length === 0) {
-				document.body.removeChild(container);
+				container.remove();
 			}
 		}, 300);
 	}, timeout * 1000);
+}
+
+function getToastContainer() {
+	let container = document.getElementById("toast-container");
+	if (container) return container;
+
+	container = document.createElement("div");
+	container.id = "toast-container";
+	container.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  `;
+	document.body.appendChild(container);
+	return container;
+}
+
+function ensureToastStyles() {
+	if (document.getElementById("toast-styles")) return;
+	const style = document.createElement("style");
+	style.id = "toast-styles";
+	style.textContent = `
+    @keyframes toastSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes toastSlideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  `;
+	document.head.appendChild(style);
 }

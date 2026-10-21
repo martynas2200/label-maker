@@ -4,7 +4,7 @@
 			<div class="flex items-center gap-2">
 				<i class="fa fa-box text-gray-500"></i>
 				<h2 class="text-lg font-semibold text-gray-900">
-					{{ $t("Recently Scanned Items") }}
+					{{ $t("recently_scanned_items") }}
 				</h2>
 				<span class="text-sm text-gray-500">({{ items.length }})</span>
 			</div>
@@ -15,7 +15,7 @@
 				variant="solid"
 				theme="red"
 			>
-				<i class="fa fa-trash mr-2"></i>{{ $t("Clear All") }}
+				<i class="fa fa-trash mr-2"></i>{{ $t("clear_all") }}
 			</Button>
 		</div>
 
@@ -23,7 +23,7 @@
 			<div class="text-gray-400 text-4xl mb-2">
 				<i class="fa fa-inbox"></i>
 			</div>
-			<p class="text-gray-500">{{ $t("No recently scanned items") }}</p>
+			<p class="text-gray-500">{{ $t("no_recently_scanned_items") }}</p>
 		</div>
 
 		<div v-else class="overflow-x-auto">
@@ -31,25 +31,25 @@
 				<thead class="border-b border-gray-200 bg-gray-50">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-700">
-							{{ $t("Item Code") }}
+							{{ $t("item_code") }}
 						</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-700">
-							{{ $t("Item Name") }}
+							{{ $t("item_name") }}
 						</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-700">
-							{{ $t("UOM") }}
+							{{ $t("uom") }}
 						</th>
 						<th class="px-4 py-3 text-right font-semibold text-gray-700">
-							{{ $t("Rate") }}
+							{{ $t("rate") }}
 						</th>
 						<th
 							v-if="showStockQty"
 							class="px-4 py-3 text-right font-semibold text-gray-700"
 						>
-							{{ $t("Stock Qty") }}
+							{{ $t("stock_qty") }}
 						</th>
 						<th class="px-4 py-3 text-center font-semibold text-gray-700">
-							{{ $t("Actions") }}
+							{{ $t("actions") }}
 						</th>
 					</tr>
 				</thead>

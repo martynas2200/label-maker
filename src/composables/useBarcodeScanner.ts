@@ -1,23 +1,25 @@
 import { ref, nextTick } from "vue";
 import type { Ref, ComputedRef } from "vue";
 import { useScannerEvents } from "./useScannerEvents";
-import { scanBarcode, type ScanResult } from "../services/scanner";
+import { resolveBarcodeScan, type ScanResult } from "../services/scanner";
 import { toast } from "../helpers/toast";
+import { useI18n } from "vue-i18n";
 
 export interface UseBarcodeScannerOptions {
   // When true, subscribes to websocket barcode events.
   active?: Ref<boolean> | ComputedRef<boolean>;
   onItem: (result: ScanResult) => void | Promise<void>;
+  onInventoryCommand?: (barcode: string) => void | Promise<void>;
   focusAfterScan?: () => void | Promise<void>;
 }
 
 // Shared barcode-scanning logic for items
 export function useBarcodeScanner(options: UseBarcodeScannerOptions) {
-  const { onItem, active = ref(true), focusAfterScan } = options;
-
+  const { onItem, onInventoryCommand, active = ref(true), focusAfterScan } = options;
+  const { t } = useI18n();
   const barcode = ref("");
 	const barcodeInputRef = ref<{ focus: () => void } | null>(null);
-  useScannerEvents(active, (code) => handleScan(code));
+  useScannerEvents(active, (code) => processBarcode(code));
 
   async function focusInput() {
     await nextTick();
@@ -26,34 +28,40 @@ export function useBarcodeScanner(options: UseBarcodeScannerOptions) {
     }
   }
 
-  async function handleScan(code: string) {
-    const normalized = (code || "").trim();
-    if (!normalized) return;
+  async function processBarcode(code: string) {
+    const barcodeValue = (code || "").trim();
+    if (!barcodeValue) return;
 
     try {
-      const result = await scanBarcode(normalized);
-      if (!result) {
+      const inventoryMatch = barcodeValue.match(/^Inventory:\s*(.+)$/i);
+      if (inventoryMatch && onInventoryCommand) {
+        await onInventoryCommand(inventoryMatch[1].trim());
+        return;
+      }
+
+      const scanResult = await resolveBarcodeScan(barcodeValue);
+      if (!scanResult) {
         toast({
-          title: "Item not found",
-          text: `Barcode: ${normalized}`,
-          icon: "alert",
+          title: t("item_not_found"),
+          text: barcodeValue,
+          variant: "warning",
           timeout: 5
         });
         return;
       }
-      await onItem(result);
+      await onItem(scanResult);
     } catch (e) {
       toast({
-        title: "Error",
+        title: t("error"),
         text: e instanceof Error ? e.message : String(e),
-        icon: "x",
+        variant: "error",
         timeout: 10
       });
     } finally {
       barcode.value = "";
-      (focusAfterScan ?? focusInput)();
+      await (focusAfterScan ?? focusInput)();
     }
   }
 
-  return { barcode, barcodeInputRef, focusInput, handleScan };
+  return { barcode, barcodeInputRef, focusInput, processBarcode };
 }

@@ -45,7 +45,7 @@ function attemptConnect() {
   ws.addEventListener('open', () => {
     state.connected = true
     state.reconnectAttempts = 0 // Reset counter on successful connection
-    console.log('WebSocket connected')
+    console.debug('WebSocket connected')
     // Send ACTIVE if window is focused
     if (document.hasFocus()) {
       sendCommand('ACTIVE')
@@ -56,7 +56,7 @@ function attemptConnect() {
     state.connected = false
     state.scannerActive = false
     ws = null
-    console.log('WebSocket closed')
+    console.debug('WebSocket closed')
     scheduleReconnect(true)
   })
 
@@ -95,8 +95,6 @@ function attemptConnect() {
 }
 
 function handleStatus(status: string) {
-  console.log('Scanner status:', status)
-
   switch (status) {
     case 'ACTIVE':
       state.scannerActive = true
@@ -109,7 +107,6 @@ function handleStatus(status: string) {
       state.scannerActive = false
       break
     case 'FORWARDED':
-      console.log('Barcode forwarded to POS')
       break
     case 'UNKNOWN_COMMAND':
       console.warn('Unknown command sent to scanner service')
@@ -124,7 +121,7 @@ function scheduleReconnect(immediate = false) {
 
   // Stop reconnecting after max attempts
   if (state.reconnectAttempts >= state.maxReconnectAttempts) {
-    console.log('Max reconnection attempts reached. Manual reconnect required.')
+    console.warn('Max WebSocket reconnection attempts reached. Manual reconnect required.')
     shouldReconnect = false
     return
   }
@@ -135,14 +132,11 @@ function scheduleReconnect(immediate = false) {
 
   if (immediate) {
     state.reconnectAttempts++
-    console.log(`Attempting to reconnect (${state.reconnectAttempts}/${state.maxReconnectAttempts})...`)
     return attemptConnect()
   }
 
-  console.log('Scheduling reconnect in 10 seconds...')
   reconnectTimer = setTimeout(() => {
     state.reconnectAttempts++
-    console.log(`Attempting to reconnect (${state.reconnectAttempts}/${state.maxReconnectAttempts})...`)
     attemptConnect()
   }, 10000)
 }
@@ -175,27 +169,21 @@ function disconnect() {
 function sendCommand(command: string) {
   if (ws && state.connected) {
     ws.send(command)
-  } else {
-    console.warn('Cannot send command: WebSocket not connected')
   }
 }
 
 function handleWindowFocus() {
-  console.log('Window focused - sending ACTIVE')
   sendCommand('ACTIVE')
 }
 
 function handleWindowBlur() {
-  console.log('Window blurred - scheduling INACTIVE')
   sendCommand('INACTIVE')
 }
 
 function handleVisibilityChange() {
   if (document.visibilityState === 'hidden') {
-    console.log('Visibility hidden - sending INACTIVE')
     sendCommand('INACTIVE')
   } else if (document.visibilityState === 'visible') {
-    console.log('Visibility visible - sending ACTIVE')
     sendCommand('ACTIVE')
   }
 }
@@ -210,7 +198,6 @@ function setupWindowListeners() {
   document.addEventListener('visibilitychange', handleVisibilityChange)
   windowListenersAttached = true
 
-  console.log('Window focus/blur listeners attached')
 }
 
 function removeWindowListeners() {
@@ -223,11 +210,9 @@ function removeWindowListeners() {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
   windowListenersAttached = false
 
-  console.log('Window focus/blur listeners removed')
 }
 
 function manualReconnect() {
-  console.log('Manual reconnect requested')
   state.reconnectAttempts = 0
   shouldReconnect = true
   attemptConnect()

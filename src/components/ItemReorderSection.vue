@@ -4,9 +4,9 @@
 		class="border-t border-gray-200 pt-4"
 	>
 		<div class="flex items-center justify-between mb-3">
-			<h5 class="text-sm font-semibold text-gray-700">{{ $t("Item Reorder Levels") }}</h5>
+			<h5 class="text-sm font-semibold text-gray-700">{{ $t("item_reorder_levels") }}</h5>
 			<Button @click="showAddReorderForm = true" variant="subtle" size="sm" theme="green">
-				<i class="fa fa-plus mr-1"></i> {{ $t("Add Reorder") }}
+				<i class="fa fa-plus mr-1"></i> {{ $t("add_reorder") }}
 			</Button>
 		</div>
 		<div class="space-y-3">
@@ -17,16 +17,16 @@
 			>
 				<div class="grid grid-cols-3 gap-3 text-sm">
 					<div>
-						<p class="text-xs font-medium text-gray-600">{{ $t("Reorder Level") }}</p>
+						<p class="text-xs font-medium text-gray-600">{{ $t("reorder_level") }}</p>
 						<p class="text-gray-900">{{ reorder.warehouse_reorder_level }}</p>
 					</div>
 					<div>
-						<p class="text-xs font-medium text-gray-600">{{ $t("Reorder Qty") }}</p>
+						<p class="text-xs font-medium text-gray-600">{{ $t("reorder_qty") }}</p>
 						<p class="text-gray-900">{{ reorder.warehouse_reorder_qty }}</p>
 					</div>
 					<div>
 						<Button
-							@click="deleteReorderLevel(idx)"
+							@click="deleteReorderLevel(reorder.name)"
 							variant="subtle"
 							size="sm"
 							theme="red"
@@ -45,28 +45,28 @@
 		v-if="showAddReorderForm"
 		class="border border-yellow-200 rounded-lg p-4 bg-yellow-50 mt-4"
 	>
-		<h5 class="text-sm font-semibold text-gray-700 mb-3">{{ $t("Add New Reorder Level") }}</h5>
+		<h5 class="text-sm font-semibold text-gray-700 mb-3">{{ $t("add_new_reorder_level") }}</h5>
 		<div class="space-y-3">
 			<div>
 				<label class="block text-xs font-medium text-gray-600 mb-1">{{
-					$t("Reorder Level")
+					$t("reorder_level")
 				}}</label>
 				<input
 					v-model.number="newReorderData.warehouse_reorder_level"
 					type="number"
 					class="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-					:placeholder="$t('Enter reorder level')"
+					:placeholder="$t('enter_reorder_level')"
 				/>
 			</div>
 			<div>
 				<label class="block text-xs font-medium text-gray-600 mb-1">{{
-					$t("Reorder Qty")
+					$t("reorder_qty")
 				}}</label>
 				<input
 					v-model.number="newReorderData.warehouse_reorder_qty"
 					type="number"
 					class="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-					:placeholder="$t('Enter reorder quantity')"
+					:placeholder="$t('enter_reorder_quantity')"
 				/>
 			</div>
 			<div class="flex gap-2">
@@ -77,7 +77,7 @@
 					theme="green"
 					:loading="savingReorder"
 				>
-					<i class="fa fa-check mr-1"></i> {{ $t("Add") }}
+					<i class="fa fa-check mr-1"></i> {{ $t("add") }}
 				</Button>
 				<Button
 					@click="
@@ -88,7 +88,7 @@
 					size="sm"
 					theme="gray"
 				>
-					<i class="fa fa-times mr-1"></i> {{ $t("Cancel") }}
+					<i class="fa fa-times mr-1"></i> {{ $t("cancel") }}
 				</Button>
 			</div>
 		</div>
@@ -101,16 +101,16 @@
 		theme="blue"
 		class="mt-4"
 	>
-		<i class="fa fa-plus mr-1"></i> {{ $t("Add First Reorder Level") }}
+		<i class="fa fa-plus mr-1"></i> {{ $t("add_first_reorder_level") }}
 	</Button>
 </template>
 
 <script>
 import { Button } from "frappe-ui";
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { call } from "frappe-ui";
 import { toast } from "../helpers/toast";
-
+import { useI18n } from "vue-i18n";
 export default {
 	name: "ItemReorderSection",
 	components: { Button },
@@ -118,32 +118,13 @@ export default {
 		item: { type: Object, required: true },
 	},
 	setup(props) {
+		const { t } = useI18n();
 		const showAddReorderForm = ref(false);
 		const savingReorder = ref(false);
-		const settings = ref(null);
 		const newReorderData = ref({
 			warehouse_reorder_level: null,
 			warehouse_reorder_qty: null,
 		});
-
-		async function loadSettings() {
-			try {
-				const result = await call("frappe.client.get", {
-					doctype: "Label Maker Settings",
-					name: "Label Maker Settings",
-				});
-				settings.value = result;
-				return result;
-			} catch (error) {
-				console.error("Failed to load settings:", error);
-				toast({
-					title: "Error",
-					text: "Failed to load Label Maker Settings. Please configure default warehouse and warehouse group in settings.",
-					icon: "x",
-				});
-				return null;
-			}
-		}
 
 		function resetReorderForm() {
 			newReorderData.value = {
@@ -155,23 +136,9 @@ export default {
 		async function addReorderLevel() {
 			if (!props.item?.item_code) {
 				toast({
-					title: "Error",
-					text: "Item code not found",
-					icon: "x",
-				});
-				return;
-			}
-
-			// Load settings if not already loaded
-			if (!settings.value) {
-				await loadSettings();
-			}
-
-			if (!settings.value?.default_warehouse || !settings.value?.default_warehouse_group) {
-				toast({
-					title: "Error",
-					text: "Default warehouse and warehouse group not configured in settings",
-					icon: "x",
+					title: t("error"),
+					text: t("item_code_not_found"),
+					variant: "error",
 				});
 				return;
 			}
@@ -181,18 +148,18 @@ export default {
 				newReorderData.value.warehouse_reorder_level === undefined
 			) {
 				toast({
-					title: "Error",
-					text: "Please enter reorder level",
-					icon: "x",
+					title: t("error"),
+					text: t("please_enter_reorder_level"),
+					variant: "error",
 				});
 				return;
 			}
 
 			if (!newReorderData.value.warehouse_reorder_qty) {
 				toast({
-					title: "Error",
-					text: "Please enter reorder quantity",
-					icon: "x",
+					title: t("error"),
+					text: t("please_enter_reorder_quantity"),
+					variant: "error",
 				});
 				return;
 			}
@@ -219,9 +186,9 @@ export default {
 				showAddReorderForm.value = false;
 
 				toast({
-					title: "Success",
-					text: "Reorder level added successfully",
-					icon: "check",
+					title: t("success"),
+					text: t("reorder_level_added_successfully"),
+					variant: "success",
 				});
 			} catch (error) {
 				console.error("Failed to add reorder level:", error);
@@ -229,7 +196,7 @@ export default {
 				toast({
 					title: "Error",
 					text: errorMsg,
-					icon: "x",
+					variant: "error",
 				});
 			} finally {
 				savingReorder.value = false;
@@ -237,7 +204,7 @@ export default {
 		}
 
 		async function deleteReorderLevel(reorderName) {
-			if (!confirm("Are you sure you want to delete this reorder level?")) {
+			if (!confirm(t("confirm_delete_reorder_level"))) {
 				return;
 			}
 
@@ -246,13 +213,10 @@ export default {
 					reorder_name: reorderName,
 				});
 
-				// Remove from local array
-				reorderLevels.value = reorderLevels.value.filter((r) => r.name !== reorderName);
-
 				toast({
-					title: "Success",
-					text: "Reorder level deleted successfully",
-					icon: "check",
+					title: t("success"),
+					text: t("reorder_level_deleted_successfully"),
+					variant: "success",
 				});
 
 				// Then reload
@@ -266,16 +230,12 @@ export default {
 				console.error("Failed to delete reorder level:", error);
 				const errorMsg = error?.message || error?.responseText || String(error);
 				toast({
-					title: "Error",
-					text: errorMsg,
-					icon: "x",
+					title: t("error"),
+					text: t(errorMsg),
+					variant: "error",
 				});
 			}
 		}
-		onMounted(() => {
-			loadSettings();
-		});
-
 		return {
 			showAddReorderForm,
 			savingReorder,
@@ -283,7 +243,6 @@ export default {
 			resetReorderForm,
 			addReorderLevel,
 			deleteReorderLevel,
-			loadSettings,
 		};
 	},
 };

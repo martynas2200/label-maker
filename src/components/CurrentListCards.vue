@@ -28,33 +28,33 @@
 					<span
 						v-if="item.disabled"
 						class="bg-red-600 text-white px-2 py-1 rounded font-semibold text-sm"
-						>{{ $t("ITEM DISABLED") }}</span
+						>{{ $t("item_disabled") }}</span
 					>
 					<span v-if="item.weight" class="font-semibold">
 						Weight: {{ item.weight }}</span
 					>
 					<span v-if="showStockQty">
-						<i class="fa fa-home margin-right-5"></i>{{ $t("Stock") }}:
+						<i class="fa fa-home margin-right-5"></i>{{ $t("stock") }}:
 						{{ item.stock_qty || 0 }}
 					</span>
 					<span v-if="item.stock_uom.toLowerCase().includes('kg')">{{
-						$t("Weighted item")
+						$t("weighted_item")
 					}}</span>
 					<span v-if="item.standard_rate >= 0 && item.weight" class="font-semibold">
-						{{ item.stock_uom }} {{ $t("Rate") }}:
+						{{ item.stock_uom }} {{ $t("rate") }}:
 						{{ (item.standard_rate || 0).toFixed(2) }}</span
 					>
 					<span
 						v-if="item.barcodes && item.barcodes.length > 1"
 						class="text-sm text-gray-500"
 					>
-						{{ item.barcodes.length }} {{ $t("Barcodes") }}
+						{{ item.barcodes.length }} {{ $t("barcodes") }}
 					</span>
 					<span
 						v-if="item.suppliers && item.suppliers.length > 1"
 						class="text-sm text-gray-500"
 					>
-						{{ item.suppliers.length }} {{ $t("Suppliers") }}
+						{{ item.suppliers.length }} {{ $t("suppliers") }}
 					</span>
 
 					<span
@@ -70,7 +70,7 @@
 						>
 							<div class="text-xs text-gray-500 mb-2">
 								<span class="font-medium text-gray-700">{{
-									$t("Latest Comment")
+									$t("latest_comment")
 								}}</span>
 								<span class="font-medium">{{ item.comments[0].comment_by }}</span>
 								<span class="mx-1">•</span>

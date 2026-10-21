@@ -3,12 +3,12 @@
 		<div class="flex items-center justify-between mb-4">
 			<div class="flex items-center gap-2">
 				<h2 class="text-lg font-semibold text-gray-900">
-					{{ $t("Recently Modified Item Prices") }}
+					{{ $t("recently_modified_item_prices") }}
 				</h2>
 				<span class="text-sm text-gray-500">({{ items.length }})</span>
 			</div>
 			<Button size="sm" :loading="loading" @click="$emit('refresh')" variant="subtle">
-				<i class="fa fa-refresh mr-2"></i>{{ $t("Refresh") }}
+				<i class="fa fa-refresh mr-2"></i>{{ $t("refresh") }}
 			</Button>
 		</div>
 
@@ -17,7 +17,7 @@
 				<i class="fa fa-inbox"></i>
 			</div>
 			<p class="text-gray-500">
-				{{ $t("No recently modified item prices") }}
+				{{ $t("no_recently_modified_item_prices") }}
 			</p>
 		</div>
 
@@ -26,22 +26,22 @@
 				<thead class="border-b border-gray-200 bg-gray-50">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-700">
-							{{ $t("Item Code") }}
+							{{ $t("item_code") }}
 						</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-700">
-							{{ $t("Item Name") }}
+							{{ $t("item_name") }}
 						</th>
 						<th class="px-4 py-3 text-right font-semibold text-gray-700">
-							{{ $t("Rate") }}
+							{{ $t("rate") }}
 						</th>
 						<th
 							v-if="showStockQty"
 							class="px-4 py-3 text-right font-semibold text-gray-700"
 						>
-							{{ $t("Stock Qty") }}
+							{{ $t("stock_qty") }}
 						</th>
 						<th class="px-4 py-3 text-center font-semibold text-gray-700">
-							{{ $t("Actions") }}
+							{{ $t("actions") }}
 						</th>
 					</tr>
 				</thead>

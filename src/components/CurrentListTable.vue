@@ -6,7 +6,7 @@
 					<div class="flex items-center gap-2">
 						<i class="fa fa-check-circle text-blue-500"></i>
 						<h2 class="text-lg font-semibold text-gray-900">
-							{{ $t("Items to Print") }}
+							{{ $t("items_to_print") }}
 						</h2>
 						<span class="text-sm text-gray-500">({{ items.length }})</span>
 					</div>
@@ -27,25 +27,25 @@
 					<thead class="border-b border-gray-200 bg-gray-50">
 						<tr>
 							<th class="px-4 py-2 text-left font-semibold text-gray-700">
-								{{ $t("Item Name") }}
+								{{ $t("item_name") }}
 							</th>
 							<th class="px-4 py-2 text-left font-semibold text-gray-700">
-								{{ $t("Item Code") }}
+								{{ $t("item_code") }}
 							</th>
 							<th class="px-4 py-2 text-left font-semibold text-gray-700">
-								{{ $t("UOM") }}
+								{{ $t("uom") }}
 							</th>
 							<th class="px-4 py-2 text-right font-semibold text-gray-700">
-								{{ $t("Rate") }}
+								{{ $t("rate") }}
 							</th>
 							<th
 								v-if="showStockQty"
 								class="px-4 py-2 text-right font-semibold text-gray-700"
 							>
-								{{ $t("Stock Qty") }}
+								{{ $t("stock_qty") }}
 							</th>
 							<th class="px-4 py-2 text-center font-semibold text-gray-700">
-								{{ $t("Actions") }}
+								{{ $t("actions") }}
 							</th>
 						</tr>
 					</thead>

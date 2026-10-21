@@ -2,10 +2,13 @@
 Settings API endpoints
 """
 
-from typing import Any
+from decimal import Decimal
+from typing import Any, Literal
 
 import frappe
+import requests
 from frappe import _
+from num2words import num2words
 
 
 @frappe.whitelist()
@@ -28,24 +31,11 @@ def get_settings() -> dict[str, Any]:
 	try:
 		# Check cache first
 		cache_key = "label_maker_settings"
-		cached = frappe.cache().hget("label_maker", cache_key)
-		if cached:
-			return cached
 
 		# Fetch settings document
 		settings = frappe.get_doc("Label Maker Settings", "Label Maker Settings")
 
-		# Extract relevant fields
-		result = {
-			"default_label_type": settings.default_label_type,
-			"ws_address": settings.ws_address,
-			"tts_api_key": settings.get_password("tts_api_key") if settings.tts_api_key else None,
-			# NOTE: Ideally, it would be better to fetch it inside of python environment, but how about latency?
-			"package_item": settings.package_item,
-			"package_item_text": settings.package_item_text,
-			"deposit_item_text": settings.deposit_item_text,
-			"deposit_item_price": settings.deposit_item_price,
-		}
+		result = settings.as_dict()
 
 		# Cache for 60 minutes
 		frappe.cache().hset("label_maker", cache_key, result, 3600)
@@ -56,11 +46,7 @@ def get_settings() -> dict[str, Any]:
 		return {
 			"default_label_type": None,
 			"ws_address": None,
-			"tts_api_key": None,
 			"package_item": None,
-			"package_item_text": "+ Bag fee (0.01)",
-			"deposit_item_text": "+ Deposit",
-			"deposit_item_price": 0.10,
 		}
 	except Exception as e:
 		frappe.log_error(f"Failed to fetch Label Maker Settings: {e!s}")
@@ -68,101 +54,52 @@ def get_settings() -> dict[str, Any]:
 
 
 @frappe.whitelist()
-def set_settings(settings: dict[str, Any]) -> dict[str, Any]:
-	"""
-	Updates Label Maker Settings.
-
-	Updates only the provided fields while preserving others.
-	Clears cache after update.
-	User must be logged in and have write permission.
-
-	Args:
-		settings: dictionary of fields to update
-
-	Returns:
-		Updated settings dictionary
-
-	Raises:
-		frappe.PermissionError: If user lacks write permission
-	"""
+def synthesize_speech(
+	phrase_type: Literal["quantity", "price"],
+	value: int | float,
+	language: str = "en",
+) -> dict[str, str]:
+	"""Generate localized speech audio without exposing the Google TTS key."""
 	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to update settings"), frappe.PermissionError)
+		frappe.throw(_("You must be logged in to use text-to-speech"), frappe.PermissionError)
+
+	if phrase_type not in {"quantity", "price"}:
+		frappe.throw(_("Unsupported speech phrase type"))
 
 	try:
-		# Check write permission
-		if not frappe.has_permission("Label Maker Settings", "write", "Label Maker Settings"):
-			frappe.throw(_("You do not have permission to update settings"), frappe.PermissionError)
+		amount = Decimal(str(value))
+	except Exception:
+		frappe.throw(_("Speech value must be a number"))
 
-		# Get existing settings or create new
-		try:
-			doc = frappe.get_doc("Label Maker Settings", "Label Maker Settings")
-		except frappe.DoesNotExistError:
-			doc = frappe.new_doc("Label Maker Settings")
-			doc.name = "Label Maker Settings"
+	if phrase_type == "quantity":
+		text = num2words(amount, lang=language)
+	elif phrase_type == "price":
+		text = num2words(amount, lang=language, to="currency")
 
-		# Update only provided fields
-		for key, value in settings.items():
-			if hasattr(doc, key):
-				setattr(doc, key, value)
-
-		doc.save()
-
-		# Clear cache
-		frappe.cache().hdel("label_maker", "label_maker_settings")
-
-		return get_settings()
-	except frappe.PermissionError:
-		raise
-	except Exception as e:
-		frappe.log_error(f"Failed to update Label Maker Settings: {e!s}")
-		raise
+	return _synthesize_google_audio(text, language)
 
 
-@frappe.whitelist()
-def get_setting(key: str) -> dict[str, Any] | None:
-	"""
-	Retrieves a single settings field.
+def _synthesize_google_audio(text: str, language: str) -> dict[str, str]:
+	settings = frappe.get_doc("Label Maker Settings", "Label Maker Settings", ignore_permissions=True)
+	api_key = settings.get_password("tts_api_key") if settings.tts_api_key else None
+	if not api_key:
+		frappe.throw(_("Google Text-to-Speech is not configured"))
 
-	Args:
-		key: Field name to retrieve
+	response = requests.post(
+		"https://texttospeech.googleapis.com/v1/text:synthesize",
+		params={"key": api_key},
+		json={
+			"input": {"text": text},
+			"voice": {"languageCode": language, "ssmlGender": "MALE"},
+			"audioConfig": {"audioEncoding": "MP3"},
+		},
+		timeout=15,
+	)
+	if not response.ok:
+		frappe.throw(_("Google Text-to-Speech request failed"))
 
-	Returns:
-		Field value or None if not found
+	audio_content = response.json().get("audioContent")
+	if not audio_content:
+		frappe.throw(_("Google Text-to-Speech returned no audio"))
 
-	Raises:
-		frappe.PermissionError: If user is not logged in
-	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to access settings"), frappe.PermissionError)
-
-	try:
-		settings = get_settings()
-		return settings.get(key)
-	except Exception as e:
-		frappe.log_error(f"Failed to fetch setting {key}: {e!s}")
-		return None
-
-
-@frappe.whitelist()
-def set_setting(key: str, value: Any) -> dict[str, Any] | None:
-	"""
-	Updates a single settings field.
-
-	Args:
-		key: Field name to update
-		value: New value
-
-	Returns:
-		Updated field value
-
-	Raises:
-		frappe.PermissionError: If user lacks write permission
-	"""
-	if not frappe.session.user or frappe.session.user == "Guest":
-		frappe.throw(_("You must be logged in to update settings"), frappe.PermissionError)
-
-	try:
-		return set_settings({key: value}).get(key)
-	except Exception as e:
-		frappe.log_error(f"Failed to set setting {key}: {e!s}")
-		raise
+	return {"audioContent": audio_content}

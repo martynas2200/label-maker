@@ -1,7 +1,7 @@
 <template>
 	<Dialog v-model="open" :options="{ size: 'lg' }">
 		<template #body-title>
-			<h3 class="text-lg font-semibold text-gray-900">{{ $t("Item Details") }}</h3>
+			<h3 class="text-lg font-semibold text-gray-900">{{ $t("item_details") }}</h3>
 		</template>
 		<template #body-content>
 			<div class="space-y-6">
@@ -16,7 +16,7 @@
 						{{ item?.item_name }}
 					</h4>
 					<p class="text-sm text-gray-500">
-						{{ $t("Code") }}:
+						{{ $t("code") }}:
 						<code class="bg-green-100 px-2 py-1 rounded">{{ item?.item_code }}</code>
 						<!-- if package_deposit -->
 						<code
@@ -24,7 +24,7 @@
 							class="bg-yellow-100 px-2 py-1 rounded ml-2"
 						>
 							<i class="fa fa-plus mr-1"></i>
-							{{ item.deposit_package_count }} {{ $t("Deposit Packages") }}
+							{{ item.deposit_package_count }} {{ $t("deposit_packages") }}
 						</code>
 					</p>
 				</div>
@@ -33,13 +33,13 @@
 				<div class="grid grid-cols-2 gap-6">
 					<div>
 						<label class="block text-sm font-medium text-gray-600 mb-2">{{
-							$t("Item Barcodes")
+							$t("item_barcodes")
 						}}</label>
 						<div
 							v-if="!item?.barcodes || item.barcodes.length === 0"
 							class="text-gray-400 italic"
 						>
-							{{ $t("No barcodes") }}
+							{{ $t("no_barcodes") }}
 						</div>
 						<div v-else class="flex flex-wrap gap-2">
 							<span
@@ -53,13 +53,13 @@
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-600 mb-2">{{
-							$t("Suppliers")
+							$t("suppliers")
 						}}</label>
 						<div
 							v-if="!item?.suppliers || item.suppliers.length === 0"
 							class="text-gray-400 italic"
 						>
-							{{ $t("No suppliers") }}
+							{{ $t("no_suppliers") }}
 						</div>
 						<div v-else class="flex flex-wrap gap-2">
 							<span
@@ -73,7 +73,7 @@
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-600 mb-1">{{
-							$t("Stock Quantity")
+							$t("stock_quantity")
 						}}</label>
 						<p class="text-gray-900">
 							{{ item?.stock_qty || 0 }} {{ item?.stock_uom }}
@@ -81,7 +81,7 @@
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-600 mb-1">{{
-							$t("Safety Stock")
+							$t("safety_stock")
 						}}</label>
 						<div class="flex items-center gap-2">
 							<div v-if="!editingSafetyStock" class="flex items-center gap-2 flex-1">
@@ -124,13 +124,13 @@
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-600 mb-1">{{
-							$t("Item Group")
+							$t("item_group")
 						}}</label>
 						<p class="text-gray-900">{{ item?.item_group }}</p>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-600 mb-1">{{
-							$t("Last Modified")
+							$t("last_modified")
 						}}</label>
 						<p class="text-gray-900 text-sm">{{ formatDate(item?.modified) }}</p>
 					</div>
@@ -139,7 +139,7 @@
 				<!-- Additional Details -->
 				<div v-if="item?.description" class="border-t border-gray-200 pt-4">
 					<label class="block text-sm font-medium text-gray-600 mb-2">{{
-						$t("Description")
+						$t("description")
 					}}</label>
 					<p class="text-gray-700 whitespace-pre-wrap">{{ item.description }}</p>
 				</div>
@@ -148,7 +148,7 @@
 				<div class="border-t border-gray-200 pt-4">
 					<div class="flex items-center justify-between mb-3">
 						<label class="block text-sm font-medium text-gray-600">{{
-							$t("Price Lists")
+							$t("price_lists")
 						}}</label>
 						<Button
 							@click="loadPriceLists"
@@ -157,7 +157,7 @@
 							size="sm"
 						>
 							<i class="fa fa-refresh mr-1"></i>
-							{{ priceLists ? $t("Refresh") : $t("Load") }} {{ $t("Prices") }}
+							{{ priceLists ? $t("refresh") : $t("load") }} {{ $t("prices") }}
 						</Button>
 					</div>
 
@@ -165,7 +165,7 @@
 						<div class="grid grid-cols-2 gap-4 p-3 bg-cyan-100 rounded-lg">
 							<div>
 								<p class="text-xs font-medium text-gray-600">
-									{{ $t("Current Selling Price") }}
+									{{ $t("current_selling_price") }}
 								</p>
 								<p
 									class="text-lg font-semibold text-gray-900"
@@ -190,7 +190,7 @@
 							</div>
 							<div v-if="item.last_purchase_rate !== null">
 								<p class="text-xs font-medium text-gray-600">
-									{{ $t("Last Purchase Rate") }}
+									{{ $t("last_purchase_rate") }}
 								</p>
 								<p class="text-lg font-semibold text-gray-900">
 									{{
@@ -210,27 +210,27 @@
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												{{ $t("Price List") }}
+												{{ $t("price_list") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												{{ $t("Rate") }}
+												{{ $t("rate") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												{{ $t("UOM") }}
+												{{ $t("uom") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												{{ $t("Valid") }}
+												{{ $t("valid") }}
 											</th>
 											<th
 												class="px-3 py-2 text-left text-xs font-medium text-gray-500"
 											>
-												{{ $t("Modified") }}
+												{{ $t("modified") }}
 											</th>
 										</tr>
 									</thead>
@@ -273,7 +273,7 @@
 
 						<div v-if="priceLists && priceLists.prices.length === 0">
 							<p class="text-sm text-gray-500 text-center py-4">
-								{{ $t("No price lists found for this item.") }}
+								{{ $t("no_price_lists_found_for_this_item") }}
 							</p>
 						</div>
 					</div>
@@ -288,7 +288,7 @@
 					class="border-t border-gray-200 pt-4"
 				>
 					<label class="block text-sm font-medium text-gray-600 mb-2"
-						>{{ $t("Comments") }} ({{ item.comments.length }})</label
+						>{{ $t("comments") }} ({{ item.comments.length }})</label
 					>
 					<div class="space-y-2 max-h-96 overflow-y-auto">
 						<div
@@ -314,7 +314,7 @@
 										v-if="!comment.seen"
 										class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded font-medium"
 									>
-										{{ $t("Unseen") }}
+										{{ $t("unseen") }}
 									</div>
 								</div>
 							</div>
@@ -331,18 +331,19 @@
 		<template #actions>
 			<div class="flex items-center justify-between gap-2">
 				<Button @click="openInErpNext" variant="solid" theme="blue">
-					<i class="fa fa-external-link mr-2"></i> {{ $t("View in ERPNext") }}
+					<i class="fa fa-external-link mr-2"></i> {{ $t("view_in_erpnext") }}
 				</Button>
-				<Button @click="close" variant="outline">{{ $t("Close") }}</Button>
+				<Button @click="close" variant="outline">{{ $t("close") }}</Button>
 			</div>
 		</template>
 	</Dialog>
 </template>
 
 <script>
-import { Dialog, Button, toast } from "frappe-ui";
+import { Dialog, Button } from "frappe-ui";
 import { computed, ref } from "vue";
 import { call } from "frappe-ui";
+import { toast } from "../helpers/toast";
 import ItemReorderSection from "./ItemReorderSection.vue";
 
 import { watch } from "vue";
@@ -386,8 +387,7 @@ export default {
 				toast({
 					title: "Error",
 					text: "Item code not found",
-					icon: "x",
-					iconClasses: "text-red-600",
+					variant: "error",
 				});
 				return;
 			}
@@ -403,8 +403,7 @@ export default {
 				toast({
 					title: "Error",
 					text: "Failed to load price lists",
-					icon: "x",
-					iconClasses: "text-red-600",
+					variant: "error",
 				});
 			} finally {
 				loadingPrices.value = false;
@@ -431,8 +430,7 @@ export default {
 				toast({
 					title: "Error",
 					text: "Item code not found",
-					icon: "x",
-					iconClasses: "text-red-600",
+					variant: "error",
 				});
 				return;
 			}
@@ -446,8 +444,7 @@ export default {
 				toast({
 					title: "Error",
 					text: "Item code not found",
-					icon: "x",
-					iconClasses: "text-red-600",
+					variant: "error",
 				});
 				return;
 			}
@@ -456,8 +453,7 @@ export default {
 				toast({
 					title: "Error",
 					text: "Please enter a valid value",
-					icon: "x",
-					iconClasses: "text-red-600",
+					variant: "error",
 				});
 				return;
 			}
@@ -479,16 +475,14 @@ export default {
 				toast({
 					title: "Success",
 					text: "Safety Stock updated successfully",
-					icon: "check",
-					iconClasses: "text-green-600",
+					variant: "success",
 				});
 			} catch (error) {
 				console.error("Failed to update safety stock:", error);
 				toast({
 					title: "Error",
 					text: "Failed to update Safety Stock",
-					icon: "x",
-					iconClasses: "text-red-600",
+					variant: "error",
 				});
 			} finally {
 				savingSafetyStock.value = false;
