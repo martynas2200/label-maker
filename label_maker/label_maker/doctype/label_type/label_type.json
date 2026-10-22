@@ -6,15 +6,8 @@
   "is_submittable": 0,
   "track_changes": 1,
   "allow_rename": 1,
-  "autoname": "field:label_name",
+  "autoname": "Prompt",
   "fields": [
-    {
-      "fieldname": "label_name",
-      "label": "Label Name",
-      "fieldtype": "Data",
-      "reqd": 1,
-      "unique": 1
-    },
     {
       "fieldname": "description",
       "label": "Description",

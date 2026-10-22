@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Invoice Helper\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-10 09:05+0018\n"
+"POT-Creation-Date: 2026-10-21 14:37+0018\n"
 "PO-Revision-Date: 2026-09-10 09:10+0000\n"
 "Last-Translator: Auto-generated <>\n"
 "Language: lt\n"
@@ -20,7 +20,7 @@ msgid "Label Maker"
 msgstr "Etiketės kūrėjas"
 
 #. Label of the actual_qty (Float) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:44
 #: label_maker/label_maker/report/stock_check_status/stock_check_status.py:65
 msgid "Actual Qty"
 msgstr "Faktinis kiekis"
@@ -34,28 +34,33 @@ msgid "Actual quantity is required"
 msgstr "Reikalingas faktinis kiekis"
 
 #. Label of the barcode (Data) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:29
 msgid "Barcode"
 msgstr "Brūkšninis kodas"
 
+#. Name of a DocType
+#: label_maker/label_maker/doctype/barcode_rule/barcode_rule.json:3
+msgid "Barcode Rule"
+msgstr "Brūkšninių kodų taisyklė"
+
 #. Description of the 'Custom CSS' (Code) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:109
 msgid "CSS injected into the print popup alongside the label dimensions. Scoped to .label { width: <width>mm; height: <height>mm; } by default."
 msgstr "CSS įterpiamas į spausdinimo iššokantį langą kartu su etiketės matmenimis. Pagal numatytuosius nustatymus jis yra susietas su .label { width: <width>mm; height: <height>mm; }."
 
 #. Label of the checked_at (Datetime) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:69
 msgid "Checked At"
 msgstr "Patikros laikas"
 
 #. Label of the checked_by (Data) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:63
 #: label_maker/label_maker/report/stock_check_status/stock_check_status.py:59
 msgid "Checked By"
 msgstr "Patikrino"
 
 #. Label of the columns (Int) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:50
 msgid "Columns"
 msgstr "Stulpeliai"
 
@@ -64,7 +69,7 @@ msgid "Counted"
 msgstr "Ar skaičiuota"
 
 #. Label of the css (Code) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:105
 msgid "Custom CSS"
 msgstr "Pasirinktinis CSS"
 
@@ -74,19 +79,19 @@ msgstr "Dienos atgal"
 
 #. Label of the default_label_type (Link) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:19
 msgid "Default Label Type"
 msgstr "Numatytoji etiketės rūšis"
 
 #. Label of the default_warehouse (Link) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:74
 msgid "Default Warehouse"
 msgstr "Numatytasis sandėlis"
 
 #. Label of the default_warehouse_group (Link) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:64
 msgid "Default Warehouse Group"
 msgstr "Numatyta sandėlių grupė"
 
@@ -95,29 +100,29 @@ msgid "Default warehouse and warehouse group not configured in Label Maker Setti
 msgstr "Numatytasis sandėlis ir sandėlių grupė nėra sukonfigūruoti etikečių kūrėjo nustatymuose"
 
 #. Label of the deposit_package_count (Int) field in DocType 'Item'
-#: label_maker/fixtures/custom_field.json
+#: label_maker/fixtures/custom_field.json:32
 msgid "Deposit Items per Stock UOM"
 msgstr "Užstato vienetų skaičius atsargų vienete"
 
 #. Label of the description (Small Text) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:20
 msgid "Description"
 msgstr "Aprašymas"
 
 #. Label of the difference (Float) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:52
 #: label_maker/label_maker/report/stock_check_status/stock_check_status.py:72
 msgid "Difference"
 msgstr "Skirtumas"
 
 #. Label of the dimensions_section (Section Break) field in DocType 'Label
 #. Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:57
 msgid "Dimensions"
 msgstr "Matmenys"
 
 #. Description of the 'Weighted' (Check) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:42
 msgid "Enable weight-entry workflow for this label type (e.g. deli / fresh items sold by weight)."
 msgstr "Įgalinti svorio įrašymo darbų eigą šiai etiketės rūšiai (pvz., deli / atvėsintos prekės, pardaviamos pagal svorį)."
 
@@ -134,40 +139,52 @@ msgid "Failed to save stock check: {0}"
 msgstr "Nepavyko išsaugoti atsargų patikros: {0}"
 
 #. Description of the 'ZPL Template' (Code) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:124
 msgid "Full ZPL command string with Jinja2 expressions. Example: ^XA^FO50,50^ADN,36,20^FD{{ item.item_name }}^FS^XZ"
 msgstr "Pilnas ZPL komandų eilutė su Jinja2 išraiškomis. Pavyzdys: ^XA^FO50,50^ADN,36,20^FD{{ item.item_name }}^FS^XZ"
 
 #. Description of the 'Google TTS API Key' (Password) field in DocType 'Label
 #. Maker Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:44
 msgid "Google Cloud Text-to-Speech API key. Used to announce prices aloud when an item is scanned. Leave blank to disable voice announcements."
 msgstr "Google Cloud teksto į kalbą API raktas. Naudojamas kainoms garsiai paskelbti, kai prekė nuskenuojama. Palikite tuščią, jei norite išjungti balso pranešimus."
 
 #. Label of the tts_api_key (Password) field in DocType 'Label Maker Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:42
 msgid "Google TTS API Key"
 msgstr "Google TTS API raktas"
 
+#: label_maker/api/settings.py:86
+msgid "Google Text-to-Speech is not configured"
+msgstr "Google teksto į kalbą funkcija nėra sukonfigūruota"
+
+#: label_maker/api/settings.py:99
+msgid "Google Text-to-Speech request failed"
+msgstr "Google teksto į kalbą užklausa nepavyko"
+
+#: label_maker/api/settings.py:103
+msgid "Google Text-to-Speech returned no audio"
+msgstr "Google teksto į kalbą funkcija negrąžino garso"
+
 #. Label of the template (Code) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:97
 msgid "HTML Body Template"
 msgstr "HTML kūno šablonas"
 
 #. Label of the html_template_section (Section Break) field in DocType 'Label
 #. Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:90
 msgid "HTML Template"
 msgstr "HTML šablonas"
 
 #. Label of the hardware_section (Section Break) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:26
 msgid "Hardware & Connectivity"
 msgstr "Įrenginiai ir jungtys"
 
 #. Label of the height (Float) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:68
 msgid "Height (mm)"
 msgstr "Aukštis (mm)"
 
@@ -177,12 +194,12 @@ msgstr "Įtraukti visas prekes su atsargomis"
 
 #. Label of the inventory_section (Section Break) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:48
 msgid "Inventory"
 msgstr "Inventorius"
 
 #. Label of the item_code (Link) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:12
 #: label_maker/label_maker/report/stock_check_status/stock_check_status.py:20
 msgid "Item Code"
 msgstr "Prekės kodas"
@@ -193,14 +210,14 @@ msgid "Item Group"
 msgstr "Prekės grupė"
 
 #. Label of the item_name (Data) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:22
 #: label_maker/label_maker/report/stock_check_status/stock_check_status.py:27
 msgid "Item Name"
 msgstr "Prekės pavadinimas"
 
 #. Description of the 'Packaging Bag Item' (Link) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:56
 msgid "Item charged for single-use packaging bags on weighted labels (e.g. a plastic bag fee). When selected, the bag fee is added to the printed label total."
 msgstr "Prekė, už kurią mokama už vieną kartą naudojamų pakavimo maišelio (pvz., plastikinio maišelio mokestis). Pasirinkus, maišelio mokestis yra pridėtas prie spausdinto etiketės galutinio sumos."
 
@@ -209,47 +226,48 @@ msgid "Item code is required"
 msgstr "Reikalingas prekės kodas"
 
 #. Description of the 'HTML Body Template' (Code) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:101
 msgid "Jinja2 HTML fragment placed inside <div class=\"label\">. Use {{ item.item_name }}, {{ barcode }}, {{ price }}, etc."
 msgstr "Jinja2 HTML fragmentas, įdėtas į <div class=\"label\">. Naudokite {{ item.item_name }}, {{ barcode }}, {{ price }} ir kt."
 
 #. Description of the 'ZPL Template' (Section Break) field in DocType 'Label
 #. Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:116
 msgid "Jinja2 ZPL template rendered server-side. Same context variables as the HTML template."
 msgstr "Jinja2 ZPL šablonas, pateiktas serverio pusėje. Tie patys konteksto kintamieji kaip HTML šablone."
 
 #. Description of the 'HTML Template' (Section Break) field in DocType 'Label
 #. Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:93
 msgid "Jinja2 template rendered server-side. Available context variables: item (all item fields), barcode (primary barcode string), price (formatted string), price_per_unit (string or null), label_type (this document)."
 msgstr "Jinja2 šablonas, pateiktas serverio pusėje. Galimi konteksto kintamieji: item (visi prekės laukai), barcode (pagrindinė brūkšninio kodo eilutė), price (suformatuota eilutė), price_per_unit (eilutė arba null), label_type (šis dokumentas)."
 
 #. Name of a DocType
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:3
 msgid "Label Maker Settings"
 msgstr "Etikečių kūrėjo nustatymai"
 
 #. Name of a role
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
-#: label_maker/label_maker/doctype/label_type/label_type.json
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/barcode_rule/barcode_rule.json:40
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:92
+#: label_maker/label_maker/doctype/label_type/label_type.json:139
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:96
 msgid "Label Maker User"
 msgstr "Etikečių kūrėjas"
 
 #. Label of the label_name (Data) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:13
 msgid "Label Name"
 msgstr "Etiketės pavadinimas"
 
 #. Name of a DocType
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:3
 msgid "Label Type"
 msgstr "Etiketės tipas"
 
 #. Description of the 'Default Label Type' (Link) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:22
 msgid "Label Type used when printing from the main list. Must be configured before printing."
 msgstr "Etiketės tipas, naudojamas spausdinant iš pagrindinio sąrašo. Prieš spausdinimą būtina sukonfigūruoti."
 
@@ -262,12 +280,12 @@ msgid "Last Checked At"
 msgstr "Paskutinį kartą patikrinta"
 
 #. Label of the margin_left (Float) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:84
 msgid "Margin Left (mm)"
 msgstr "Kairės paraštė (mm)"
 
 #. Label of the margin_top (Float) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:78
 msgid "Margin Top (mm)"
 msgstr "Viršutinė paraštė (mm)"
 
@@ -281,60 +299,68 @@ msgstr "Neleidžiama"
 
 #. Description of the 'Deposit Items per Stock UOM' (Int) field in DocType
 #. 'Item'
-#: label_maker/fixtures/custom_field.json
+#: label_maker/fixtures/custom_field.json:11
 msgid "Number of deposit-bearing items (e.g., bottles or cans) in one stock UOM of this item, e.g., 6 for a pack of 6 bottles."
 msgstr "Užstato vienetų (pvz., butelių ar skardinių) skaičius viename šios prekės atsargų matavimo vienete, pvz., 6 – pakuotėje su 6 buteliais."
 
 #. Description of the 'Columns' (Int) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:53
 msgid "Number of label columns per printed sheet row."
 msgstr "Spausdinamo lapo eilutėje esančių etikečių stulpelių skaičius."
 
 #. Label of the package_item (Link) field in DocType 'Label Maker Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:53
 msgid "Packaging Bag Item"
 msgstr "Pakavimo maišelio prekė"
 
 #. Label of the print_format (Select) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:30
 msgid "Print Format"
 msgstr "Spausdinimo formatas"
 
 #. Label of the print_settings_section (Section Break) field in DocType 'Label
 #. Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:25
 msgid "Print Settings"
 msgstr "Spausdinimo nustatymai"
 
 #. Label of the printing_section (Section Break) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:14
 msgid "Printing"
 msgstr "Spausdinimas"
 
+#. Label of the rule (Code) field in DocType 'Barcode Rule'
+#: label_maker/label_maker/doctype/barcode_rule/barcode_rule.json:13
+msgid "Regex Rule"
+msgstr "Regex taisyklė"
+
 #. Description of the 'Default Warehouse' (Link) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:77
 msgid "Specific warehouse used for stock level display in the item list."
 msgstr "Konkretaus sandėlio naudojimas atsargų lygio rodymui prekių sąraše."
 
+#: label_maker/api/settings.py:72
+msgid "Speech value must be a number"
+msgstr "Kalbos vertė turi būti skaičius"
+
 #. Name of a DocType
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:3
 msgid "Stock Check Log"
 msgstr "Atsargų patikros žurnalas"
 
 #. Name of a report
-#: label_maker/label_maker/report/stock_check_status/stock_check_status.json
+#: label_maker/label_maker/report/stock_check_status/stock_check_status.json:19
 msgid "Stock Check Status"
 msgstr "Atsargų patikros būsena"
-
 
 #: label_maker/label_maker/report/stock_check_status/stock_check_status.py:40
 msgid "Stock Qty"
 msgstr "Atsargų kiekis"
 
 #. Description of the 'System Qty' (Float) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:40
 msgid "Stock quantity at the time of check"
 msgstr "Atsargų kiekis patikros metu"
 
@@ -342,52 +368,56 @@ msgstr "Atsargų kiekis patikros metu"
 msgid "Syntax error in {0}: {1}"
 msgstr "Sintaksės klaida {0}: {1}"
 
-#. Name of a role
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
-#: label_maker/label_maker/doctype/label_type/label_type.json
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
-msgid "System Manager"
-msgstr ""
 
 #. Label of the system_qty (Float) field in DocType 'Stock Check Log'
-#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json
+#: label_maker/label_maker/doctype/stock_check_log/stock_check_log.json:38
 msgid "System Qty"
 msgstr "Sistemos kiekis"
 
-#: label_maker/api/labels.py:244
-msgid "Template render error in Label Type '{0}': {1}"
-msgstr ""
-
 #. Label of the tts_section (Section Break) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:37
 msgid "Text-to-Speech"
 msgstr "Tekstas į kalbą"
 
+#. Label of the type (Select) field in DocType 'Barcode Rule'
+#: label_maker/label_maker/doctype/barcode_rule/barcode_rule.json:21
+msgid "Type"
+msgstr "Tipas"
+
 #. Description of the 'WebSocket Address' (Data) field in DocType 'Label Maker
 #. Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:33
 msgid "URL of the WebSocket server that relays barcode scanner and scale readings. Expected message format: <code>BARCODE:&lt;value&gt;</code> or <code>WEIGHT:&lt;grams&gt;</code>. Example: <code>ws://192.168.1.10:8765</code>"
 msgstr "Brūkšninių kodų skaitytuvo ir svarstyklių skaitymų perdavimo WebSocket serverio URL. Tikimasi, kad pranešimo formatas bus: <code>BARCODE:&lt;value&gt;</code> arba <code>WEIGHT:&lt;grams&gt;</code>. Pavyzdys: <code>ws://192.168.1.10:8765</code>"
 
+#: label_maker/api/settings.py:67
+msgid "Unsupported speech phrase type"
+msgstr "Nepalaikomas kalbos frazės tipas"
+
+#. Description of the 'Regex Rule' (Code) field in DocType 'Barcode Rule'
+#: label_maker/label_maker/doctype/barcode_rule/barcode_rule.json:17
+msgid "Use named groups Code and Quantity to extract the item code and weight in grams. Supported groups: Code, Quantity, Amount, Prefix, Suffix, Control."
+msgstr ""
+
 #. Description of the 'Default Warehouse Group' (Link) field in DocType 'Label
 #. Maker Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:70
 msgid "Warehouse group used to filter stock level lookups."
 msgstr "Sandėlių grupė, naudojama atsargų lygio paieškai filtruoti."
 
 #. Label of the ws_address (Data) field in DocType 'Label Maker Settings'
-#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json
+#: label_maker/label_maker/doctype/label_maker_settings/label_maker_settings.json:31
 msgid "WebSocket Address"
 msgstr "WebSocket adresas"
 
 #. Label of the weighted (Check) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:39
 msgid "Weighted"
 msgstr "Svorinė"
 
 #. Label of the width (Float) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:62
 msgid "Width (mm)"
 msgstr "Plotis (mm)"
 
@@ -396,25 +426,13 @@ msgstr "Plotis (mm)"
 msgid "Yes"
 msgstr "Taip"
 
-#: label_maker/api/settings.py:94
-msgid "You do not have permission to update settings"
-msgstr "Neturite leidimo atnaujinti nustatymų"
-
-#: label_maker/api/settings.py:26 label_maker/api/settings.py:136
+#: label_maker/api/settings.py:29
 msgid "You must be logged in to access settings"
 msgstr "Norint pasiekti nustatymus, turite prisijungti"
 
-#: label_maker/api/settings.py:89 label_maker/api/settings.py:162
-msgid "You must be logged in to update settings"
-msgstr "Norint atnaujinti nustatymus, turite prisijungti"
-
-#: label_maker/api/labels.py:34
-msgid "You must have the Label Maker User role to access label types."
-msgstr "Norint pasiekti etikečių tipus, turite turėti etikečių kūrėjo vartotojo vaidmenį"
-
-#: label_maker/api/labels.py:88 label_maker/api/labels.py:119
-msgid "You must have the Label Maker User role to render labels."
-msgstr "Norėdami sugeneruoti etiketes, turite turėti etikečių kūrėjo vartotojo vaidmenį"
+#: label_maker/api/settings.py:64
+msgid "You must be logged in to use text-to-speech"
+msgstr "Norint naudoti teksto į kalbą funkciją, turite prisijungti"
 
 #: label_maker/api/stocktake.py:40
 msgid "You must have the role Label Maker User to perform stock checks"
@@ -423,22 +441,22 @@ msgstr "Norint atlikti atsargų patikras, turite turėti etikečių kūrėjo var
 #. Label of the zpl_template_section (Section Break) field in DocType 'Label
 #. Type'
 #. Label of the zpl_template (Code) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:113
 msgid "ZPL Template"
 msgstr "ZPL šablonas"
 
 #. Option for the 'Print Format' (Select) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:32
 msgid "html"
 msgstr "html"
 
 #. Description of the 'Print Format' (Select) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:35
 msgid "html: renders the HTML template in a browser print dialog. zpl: sends raw ZPL commands to a label printer."
 msgstr "html: pateikia HTML šabloną naršyklės spausdinimo dialoge. zpl: siunčia raw ZPL komandas į etikečių spausdintuvą."
 
 #. Option for the 'Print Format' (Select) field in DocType 'Label Type'
-#: label_maker/label_maker/doctype/label_type/label_type.json
+#: label_maker/label_maker/doctype/label_type/label_type.json:32
 msgid "zpl"
 msgstr "zpl"
 

@@ -6,6 +6,7 @@
 			@scan="processBarcode"
 			:placeholder="$t('scan_item_barcode_to_start_counting')"
 		/>
+		<ScanLoadingOverlay :visible="isProcessing" />
 
 		<div
 			v-if="currentItem"
@@ -263,14 +264,14 @@ import { ref, computed, nextTick, watch } from "vue";
 import { Button, FeatherIcon } from "frappe-ui";
 import { useBarcodeScanner } from "../composables/useBarcodeScanner";
 import { getStockTakeService } from "../api/stocktake";
-import { getTTSService } from "../api/tts";
 import { toast } from "../helpers/toast";
 import { useI18n } from "vue-i18n";
 import BarcodeInput from "./BarcodeInput.vue";
+import ScanLoadingOverlay from "./ScanLoadingOverlay.vue";
 
 export default {
 	name: "StockTakingView",
-	components: { Button, FeatherIcon, BarcodeInput },
+	components: { Button, FeatherIcon, BarcodeInput, ScanLoadingOverlay },
 	props: {
 		initialBarcode: {
 			type: String,
@@ -280,7 +281,6 @@ export default {
 	emits: ["exit", "initial-barcode-processed"],
 	setup(props, { emit }) {
 		const stockTakeService = getStockTakeService();
-		const tts = getTTSService();
 		const { t } = useI18n();
 
 		const currentItem = ref(null);
@@ -291,46 +291,45 @@ export default {
 		const checkedItems = ref([]);
 		let scanVersion = 0;
 
-		const { barcode, barcodeInputRef, focusInput, processBarcode } = useBarcodeScanner({
-			active: ref(true),
-			onInventoryCommand: (inventoryBarcode) => processBarcode(inventoryBarcode),
-			onItem: async ({ item, packagedWeight }) => {
-				const currentScanVersion = ++scanVersion;
-				if (!item.is_stock_item) {
-					toast({
-						title: t("item_not_stock_item", {
-							item_code: item.item_code,
-						}),
-					});
-					return;
-				}
+		const { barcode, barcodeInputRef, focusInput, processBarcode, isProcessing } =
+			useBarcodeScanner({
+				active: ref(true),
+				getSpeechRequest: () => ({
+					language: navigator.language,
+					speechType: "quantity",
+				}),
+				onItem: async (item) => {
+					const currentScanVersion = ++scanVersion;
+					if (!item.is_stock_item) {
+						toast({
+							title: t("item_not_stock_item", {
+								item_code: item.item_code,
+							}),
+						});
+						return;
+					}
 
-				// Load last check info
-				let last = null;
-				try {
-					last = await stockTakeService.getLastCheck(item.item_code);
-				} catch (_) {
-					// Ignore errors fetching last check
-				}
-				if (currentScanVersion !== scanVersion) return;
+					// Load last check info
+					let last = null;
+					try {
+						last = await stockTakeService.getLastCheck(item.item_code);
+					} catch (_) {
+						// Ignore errors fetching last check
+					}
+					if (currentScanVersion !== scanVersion) return;
 
-				currentItem.value = item;
-				systemQty.value = item.stock_qty ?? 0;
-				lastCheck.value = last;
-				actualQty.value = packagedWeight > 0 ? packagedWeight : null;
-				// Speak the system quantity
-				const qty = item.stock_qty ?? 0;
-				if (qty > 0) {
-					tts.speak("quantity", qty);
-				}
-			},
-			// Focus the quantity input after a successful scan
-			focusAfterScan: async () => {
-				await nextTick();
-				const qtyInput = document.querySelector('input[type="number"]');
-				if (qtyInput) qtyInput.focus();
-			},
-		});
+					currentItem.value = item;
+					systemQty.value = item.stock_qty ?? 0;
+					lastCheck.value = last;
+					actualQty.value = item?.weight > 0 ? item.weight : null;
+				},
+				// Focus the quantity input after a successful scan
+				focusAfterScan: async () => {
+					await nextTick();
+					const qtyInput = document.querySelector('input[type="number"]');
+					if (qtyInput) qtyInput.focus();
+				},
+			});
 
 		watch(
 			() => props.initialBarcode,
@@ -445,6 +444,7 @@ export default {
 		return {
 			barcode,
 			barcodeInputRef,
+			isProcessing,
 			currentItem,
 			systemQty,
 			actualQty,

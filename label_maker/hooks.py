@@ -21,6 +21,7 @@ add_to_apps_screen = [
 fixtures = [
 	{"dt": "Custom Field", "filters": [["name", "in", ["Item-deposit_package_count"]]]},
 	{"dt": "Custom DocPerm", "filters": [["parent", "=", "Item"], ["role", "=", "Label Maker User"]]},
+	{"dt": "Barcode Rule"},
 ]
 
 # Includes in <head>

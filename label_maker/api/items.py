@@ -2,15 +2,49 @@
 Item API endpoints
 """
 
+import re
 from datetime import datetime
-from typing import Any
+from decimal import Decimal
+from typing import Any, TypedDict
 
 import frappe
 from frappe import _
+from frappe.utils.caching import redis_cache
+from num2words import num2words
+
+from .speech import _synthesize_google_audio
+
+
+class ItemDTO(TypedDict, total=False):
+	barcodes: list[str]
+	comments: list[dict[str, Any]]
+	deposit_package_count: float
+	description: str | None
+	disabled: bool
+	is_packaged: bool
+	is_stock_item: bool
+	item_code: str
+	item_group: str
+	item_name: str
+	last_purchase_rate: float | None
+	modified: str
+	reorder_levels: list[dict[str, Any]]
+	safety_stock: float
+	standard_rate: float | None
+	stock_qty: float | None
+	stock_uom: str
+	suppliers: list[str]
+	total_price: float
+	weight: float
+	audio_request_id: str
 
 
 @frappe.whitelist()
-def get_item(code_or_barcode: str) -> dict[str, Any] | None:
+def get_item(
+	code_or_barcode: str,
+	language: str | None = None,
+	speech_type: str | None = None,
+) -> ItemDTO | None:
 	"""
 	Retrieves an item by item code or barcode.
 
@@ -27,16 +61,120 @@ def get_item(code_or_barcode: str) -> dict[str, Any] | None:
 		frappe.PermissionError: If user is not logged in
 	"""
 
-	# Look up barcode first
-	barcode_result = _find_item_code_and_uom_by_barcode(code_or_barcode)
+	decoded_barcode = _decode_barcode(code_or_barcode)
+	barcode_result = _find_item_code_and_uom_by_barcode(
+		decoded_barcode["item_barcode"] if decoded_barcode else code_or_barcode
+	)
 	if barcode_result:
 		item_code, uom = barcode_result
 	else:
 		# Fall back to using input as item code
-		item_code = code_or_barcode
+		item_code = decoded_barcode["item_barcode"] if decoded_barcode else code_or_barcode
 		uom = None
 
-	return _fetch_item_details(item_code, uom)
+	item = _fetch_item_details(item_code, uom)
+
+	if item and decoded_barcode:
+		item["is_packaged"] = True
+		item["weight"] = decoded_barcode["quantity"] / 1000
+		if isinstance(item.get("standard_rate"), int | float):
+			item["total_price"] = round(float(item["standard_rate"]) * item["weight"], 2)
+
+	if item and speech_type in {"quantity", "price"}:
+		value = (
+			item.get("stock_qty")
+			if speech_type == "quantity"
+			else item.get("total_price")
+			if item.get("is_packaged")
+			else item.get("standard_rate")
+		)
+		if isinstance(value, int | float):
+			request_id = frappe.generate_hash(length=20)
+			frappe.enqueue(
+				"label_maker.api.items.push_item_audio",
+				queue="short",
+				item_value=value,
+				speech_type=speech_type,
+				language=language or "en",
+				request_id=request_id,
+				user=frappe.session.user,
+			)
+			item["audio_request_id"] = request_id
+
+	return item
+
+
+def push_item_audio(
+	item_value: float,
+	speech_type: str,
+	language: str | None,
+	request_id: str,
+	user: str,
+) -> None:
+	"""Generate item speech in a worker and deliver it to the requesting user."""
+	try:
+		text = num2words(
+			Decimal(item_value),
+			lang=language,
+			to="currency" if speech_type == "price" else "cardinal",
+		)
+		audio = _synthesize_google_audio(text, language)
+		frappe.publish_realtime(
+			event="label_maker_item_audio",
+			message={"request_id": request_id, "audioContent": audio["audioContent"]},
+			user=user,
+		)
+	except Exception:
+		frappe.log_error(title="Failed to generate item audio")
+
+
+@redis_cache(43200)
+def get_barcode_rules() -> list[dict[str, Any]]:
+	"""Returns all configured barcode rules."""
+	valid_rules = []
+
+	rules = frappe.get_all("Barcode Rule", fields=["name", "rule"], order_by="modified asc")
+	for rule in rules:
+		try:
+			# Accept both Python and .NET-style named group syntax in configured rules.
+			rule["rule"] = re.sub(r"\(\?<([A-Za-z][A-Za-z0-9_]*)>", r"(?P<\1>", rule["rule"])
+			re.compile(rule["rule"])
+		except re.error:
+			frappe.log_error(f"Invalid Barcode Rule {rule['name']}")
+			continue
+		valid_rules.append(rule)
+
+	return valid_rules
+
+
+def _decode_barcode(barcode: str) -> dict[str, Any] | None:
+	"""Decode a barcode using the first matching configured Barcode Rule."""
+	if not barcode:
+		return None
+
+	for rule in get_barcode_rules():
+		match = re.match(rule["rule"], barcode.strip())
+		if not match:
+			continue
+
+		groups = {key.lower(): value for key, value in match.groupdict().items() if value is not None}
+		item_barcode = groups.get("code")
+		quantity = groups.get("quantity")
+		if not item_barcode:
+			continue
+
+		try:
+			quantity_value = float(quantity) if quantity else 0
+		except ValueError:
+			continue
+
+		return {
+			"item_barcode": item_barcode.lstrip("0") or item_barcode,
+			"quantity": quantity_value,
+			"rule": rule["name"],
+		}
+
+	return None
 
 
 @frappe.whitelist()
@@ -314,12 +452,9 @@ def _find_item_code_and_uom_by_barcode(barcode: str) -> tuple[str, str] | None:
 		return None
 
 
-def _fetch_item_details(item_code: str, uom: str | None = None) -> dict[str, Any] | None:
+def _fetch_item_details(item_code: str, uom: str | None = None) -> ItemDTO | None:
 	"""
 	Fetches complete item details including barcodes, pricing, and stock in one request.
-
-	Combines data from Item, Item Barcode, Bin, and Item Price tables.
-	This is more efficient than multiple requests from the frontend.
 
 	Args:
 		item_code: Item code to fetch
@@ -340,57 +475,62 @@ def _fetch_item_details(item_code: str, uom: str | None = None) -> dict[str, Any
 
 		# Get stock level
 		stock_qty = None
-		try:
-			bin_entry = frappe.get_value("Bin", filters={"item_code": item_code}, fieldname="actual_qty")
-			stock_qty = bin_entry if bin_entry is not None else 0
-		except Exception:
-			stock_qty = 0
+		if item.is_stock_item:
+			try:
+				bin_entry = frappe.get_value("Bin", filters={"item_code": item_code}, fieldname="actual_qty")
+				stock_qty = bin_entry if bin_entry is not None else 0
+			except Exception:
+				stock_qty = None
 
 		# Fetch item price, usually for the stock UOM if no barcode UOM is provided.
 		try:
 			standard_rate = get_item_selling_price(item_code, uom=uom if uom else item.stock_uom)
 		except Exception as e:
 			frappe.log_error(f"Error fetching item price for {item_code}: {e!s}")
-			standard_rate = "ERROR"
+			standard_rate = None
 
 		# Fetch all comments
-		try:
-			comments = frappe.get_all(
-				"Comment",
-				filters={"reference_doctype": "Item", "reference_name": item_code, "comment_type": "Comment"},
-				fields=["*"],
-			)
-		except Exception as e:
-			frappe.log_error(f"Error fetching comments for item {item_code}: {e!s}")
-			comments = []
+		comments = []
+		if frappe.has_permission("Comment", "read"):
+			try:
+				comments = frappe.get_all(
+					"Comment",
+					filters={
+						"reference_doctype": "Item",
+						"reference_name": item_code,
+						"comment_type": "Comment",
+					},
+					fields=["content", "creation", "comment_by", "seen"],
+					order_by="creation desc",
+				)
+			except Exception as e:
+				frappe.log_error(f"Error fetching comments for item {item_code}: {e!s}")
 
-		# Build response
-		# TODO: Handler and Service logic concerns are mixed here
 		return {
-			"item_code": item.name,
-			"is_stock_item": item.is_stock_item if hasattr(item, "is_stock_item") else False,
-			"item_name": item.item_name,
-			"item_group": item.item_group,
-			"suppliers": [s.supplier for s in item.supplier_items] if hasattr(item, "supplier_items") else [],
-			"stock_uom": item.stock_uom,
-			"standard_rate": standard_rate,
-			"last_purchase_rate": item.last_purchase_rate
-			if hasattr(item, "last_purchase_rate") and frappe.has_permission("Item Price", "read")
-			else None,
-			"safety_stock": item.safety_stock if hasattr(item, "safety_stock") else 0,
-			"comments": comments,
-			"reorder_levels": item.get("reorder_levels") if hasattr(item, "reorder_levels") else [],
 			"barcodes": [bc.barcode for bc in item.barcodes] if hasattr(item, "barcodes") else [],
-			"stock_qty": stock_qty,
-			"description": item.description if hasattr(item, "description") else None,
+			"comments": comments,
 			"deposit_package_count": item.deposit_package_count
 			if hasattr(item, "deposit_package_count")
 			else 0,
-			"disabled": item.disabled if hasattr(item, "disabled") else False,
+			"description": item.description,
+			"disabled": item.disabled,
+			"is_packaged": False,
+			"is_stock_item": item.is_stock_item,
+			"item_code": item.name,
+			"item_group": item.item_group,
+			"item_name": item.item_name,
+			"last_purchase_rate": item.last_purchase_rate
+			if frappe.has_permission("Item Price", "read")
+			else None,
 			"modified": item.modified,
+			"reorder_levels": item.get("reorder_levels") if hasattr(item, "reorder_levels") else [],
+			"safety_stock": item.safety_stock if hasattr(item, "safety_stock") else 0,
+			"standard_rate": standard_rate,
+			"stock_qty": stock_qty,
+			"stock_uom": item.stock_uom,
+			"suppliers": [s.supplier for s in item.supplier_items] if hasattr(item, "supplier_items") else [],
 		}
 	except frappe.DoesNotExistError:
 		return None
-	except Exception as e:
-		frappe.log_error(f"Error fetching item details for {item_code}: {e!s}")
-		return None
+	except Exception:
+		frappe.throw(f"Failed to fetch item details for {item_code}", frappe.InternalError)

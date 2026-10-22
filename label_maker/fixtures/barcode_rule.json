@@ -1,0 +1,27 @@
+[
+  {
+    "doctype": "Barcode Rule",
+    "name": "Deli 1",
+    "rule": "^(?<Code>(23)[0-9]{6})(?<Quantity>[0-9]{4})(?<Control>[0-9]{1})$"
+  },
+  {
+    "doctype": "Barcode Rule",
+    "name": "Deli 2",
+    "rule": "^(?<Code>(24)[0-9]{6})(?<Quantity>[0-9]{4})(?<Control>[0-9]{1})$"
+  },
+  {
+    "doctype": "Barcode Rule",
+    "name": "Deli for MM",
+    "rule": "^(?<Code>(25)[0-9]{5})(?<Quantity>[0-9]{5})(?<Control>[0-9]{1})$"
+  },
+  {
+    "doctype": "Barcode Rule",
+    "name": "Deli for Sanitex",
+    "rule": "^(?<Code>(29)[0-9]{5})(?<Quantity>[0-9]{5})(?<Control>[0-9]{1})$"
+  },
+  {
+    "doctype": "Barcode Rule",
+    "name": "DYMO lipdukai",
+    "rule": "^2200(?<Code>[0-9]{13})(?<Quantity>[0-9]{4})$"
+  }
+]

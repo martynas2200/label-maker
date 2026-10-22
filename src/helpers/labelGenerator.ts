@@ -1,5 +1,6 @@
-
-
+// TO BE REMOVED AS WE MOVE TO Dynamic Templates for label generation
+// as this file is a copy of previous script
+// TODO: Barcode sizing should be still figured out
 import { type Item, type PackagedItem} from '../types'
 import { Code128, getDataMatrixMat, toPath } from './barcodeGenerator'
 
@@ -136,7 +137,6 @@ export class LabelGenerator {
 
     label.appendChild(this.createDivWithClass('price', this.getItemPrice(data)))
 
-    // TODO: NEEDS TO BE A PART OF SETTINGS
     if (data.deposit_package_count != null && data.deposit_package_count > 0) {
       const packagePrice = 0.1 * data.deposit_package_count
       label.appendChild(
@@ -220,8 +220,6 @@ export class LabelGenerator {
       { className: 'weight-text', text: data.stock_uom },
       { className: 'kg-text', text: '€/' + data.stock_uom },
     ]
-    // TODO: use the settings to determine if package fee is added
-    // TODO: add a setting for package fee text
     if (data.add_package_fee && !half) {
       elements.push({ className: 'package', text: '+ 0,01 (fas. maišelis)' })
     }
@@ -331,7 +329,6 @@ export class LabelGenerator {
     svg.setAttribute('class', 'datamatrix')
     // Set viewBox to exactly match the matrix dimensions with small padding
     svg.setAttribute('viewBox', `0 0 ${actualSize} ${actualSize}`)
-    // TODO: not sure about max constraints
     if (big === true) {
       svg.style.width = '100%'
       svg.style.height = '100%'

@@ -97,6 +97,8 @@
 			</template>
 		</div>
 
+		<ScanLoadingOverlay :visible="isProcessing" />
+
 		<!-- Weight Modal -->
 		<WeightLabelModal
 			v-if="weightModalItem"
@@ -123,7 +125,7 @@ import { getItemService } from "./api/items";
 import { getWebSocketService } from "./api/websocket";
 import { getLabelService } from "./api/labels";
 import { getSettingsService } from "./api/settings";
-import { getTTSService } from "./api/tts";
+import { connectFrappeRealtime } from "./api/frappeRealtime";
 import { LabelGenerator } from "./helpers/labelGenerator";
 import { toast } from "./helpers/toast";
 import AppHeader from "./components/AppHeader.vue";
@@ -135,6 +137,7 @@ import RecentlyScannedTab from "./components/RecentlyScannedTab.vue";
 import WeightLabelModal from "./components/WeightLabelModal.vue";
 import ItemDetailsModal from "./components/ItemDetailsModal.vue";
 import StockTakingView from "./components/StockTakingView.vue";
+import ScanLoadingOverlay from "./components/ScanLoadingOverlay.vue";
 import { useI18n } from "vue-i18n";
 
 export default {
@@ -151,6 +154,7 @@ export default {
 		WeightLabelModal,
 		ItemDetailsModal,
 		StockTakingView,
+		ScanLoadingOverlay,
 	},
 	setup() {
 		const { t } = useI18n();
@@ -158,7 +162,6 @@ export default {
 		const websocket = getWebSocketService();
 		const labels = getLabelService();
 		const settingsSvc = getSettingsService();
-		const tts = getTTSService();
 
 		const tabs = [
 			{ label: t("recently_modified"), key: "modified" },
@@ -196,53 +199,47 @@ export default {
 		let dimTimer = null;
 		let autoRefreshTimer = null;
 
-		const { barcode, barcodeInputRef, focusInput, processBarcode } = useBarcodeScanner({
-			active: computed(() => !stockTakingMode.value),
-			onInventoryCommand: (inventoryBarcode) => {
-				pendingInventoryBarcode.value = inventoryBarcode;
-				stockTakingMode.value = true;
-			},
-			onItem: ({ item, isPackaged, packagedWeight }) => {
-				// Add to current list (remove duplicates, keep order)
-				currentList.value = [
-					item,
-					...currentList.value.filter((i) => i.item_code !== item.item_code),
-				].slice(0, 50);
+		const { barcode, barcodeInputRef, focusInput, processBarcode, isProcessing } =
+			useBarcodeScanner({
+				active: computed(() => !stockTakingMode.value),
+				getSpeechRequest: () => {
+					if (speakQuantity.value)
+						return { language: navigator.language, speechType: "quantity" };
+					if (speakPrice.value)
+						return { language: navigator.language, speechType: "price" };
+					return null;
+				},
+				onInventoryCommand: (inventoryBarcode) => {
+					pendingInventoryBarcode.value = inventoryBarcode;
+					stockTakingMode.value = true;
+				},
+				onItem: (item) => {
+					// Add to current list (remove duplicates, keep order)
+					currentList.value = [
+						item,
+						...currentList.value.filter((i) => i.item_code !== item.item_code),
+					].slice(0, 50);
 
-				// Also add to history (remove duplicates, keep order)
-				recentlyScanned.value = [
-					item,
-					...recentlyScanned.value.filter((i) => i.item_code !== item.item_code),
-				].slice(0, 50);
-				localStorage.setItem("recentlyScanned", JSON.stringify(recentlyScanned.value));
+					// Also add to history (remove duplicates, keep order)
+					recentlyScanned.value = [
+						item,
+						...recentlyScanned.value.filter((i) => i.item_code !== item.item_code),
+					].slice(0, 50);
+					localStorage.setItem("recentlyScanned", JSON.stringify(recentlyScanned.value));
 
-				// Trigger dim effect for other items
-				triggerDimEffect();
+					// Trigger dim effect for other items
+					triggerDimEffect();
+					const isPackaged = Boolean(item.is_packaged);
 
-				// Speak quantity if enabled (overrides speakPrice)
-				if (speakQuantity.value) {
-					const qty = item.stock_qty || 0;
-					if (qty > 0) {
-						tts.speak("quantity", qty);
-					}
-				} else if (speakPrice.value) {
-					const price = isPackaged ? item.total_price : item.standard_rate || 0;
-					if (price > 0) {
-						tts.speak("price", price);
-					}
-				}
-
-				const message = isPackaged
-					? t("packaged_item_added", { code: item.item_code })
-					: t("item_added", { code: item.item_code });
-
-				toast({
-					title: message,
-					variant: "success",
-					timeout: 2,
-				});
-			},
-		});
+					toast({
+						title: t(isPackaged ? "packaged_item_added" : "item_added", {
+							code: item.item_code,
+						}),
+						variant: "success",
+						timeout: 2,
+					});
+				},
+			});
 
 		const wsConnected = computed(() => websocket.state.connected);
 		const showReconnectButton = computed(() => {
@@ -417,6 +414,7 @@ export default {
 					// If no websocket, focus input for manual entry
 					showInputManually.value = true;
 				}
+				void connectFrappeRealtime();
 
 				// Load recently modified items
 				await loadRecentlyModified(false);
@@ -494,6 +492,7 @@ export default {
 			weightModalOpen,
 			weightModalItem,
 			showDimEffect,
+			isProcessing,
 			processBarcode,
 			onPrint,
 			loadRecentlyModified,

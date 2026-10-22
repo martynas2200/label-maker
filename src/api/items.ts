@@ -1,4 +1,6 @@
 import { getApi } from './api'
+
+export type SpeechType = 'quantity' | 'price'
 /**
  * Wrapper for Python backend API
  * Logic is in items.py
@@ -7,8 +9,12 @@ export function getItemService() {
   const api = getApi()
 
   return {
-    getItem: (codeOrBarcode: string) =>
-      api.call('label_maker.api.items.get_item', { code_or_barcode: codeOrBarcode }),
+    getItem: (codeOrBarcode: string, language?: string, speechType?: SpeechType) =>
+      api.call('label_maker.api.items.get_item', {
+        code_or_barcode: codeOrBarcode,
+        language,
+        speech_type: speechType,
+      }),
 
     getRecentlyModifiedItems: (forceRefresh = false) =>
       api.call('label_maker.api.items.get_recently_modified_items', {

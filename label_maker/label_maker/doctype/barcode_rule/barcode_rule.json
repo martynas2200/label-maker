@@ -1,0 +1,41 @@
+{
+  "doctype": "DocType",
+  "name": "Barcode Rule",
+  "module": "Label Maker",
+  "custom": 0,
+  "is_submittable": 0,
+  "track_changes": 1,
+  "allow_rename": 1,
+  "autoname": "Prompt",
+  "fields": [
+    {
+      "fieldname": "rule",
+      "label": "Regex Rule",
+      "fieldtype": "Code",
+      "reqd": 1,
+      "description": "Use named groups Code and Quantity to extract the item code and weight in grams. Supported groups: Code, Quantity, Amount, Prefix, Suffix, Control. Example: ^(?&lt;Prefix&gt;25)(?&lt;Code&gt;[0-9]{5})(?&lt;Quantity&gt;[0-9]{5})(?&lt;Control&gt;[0-9]{1})$"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    },
+    {
+      "role": "Label Maker User",
+      "read": 1,
+      "write": 0,
+      "create": 0,
+      "delete": 0,
+      "submit": 0,
+      "cancel": 0,
+      "amend": 0
+    }
+  ]
+}
